@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import "./styles/App.css";
 
@@ -6,6 +6,7 @@ import SocketContext from "./config/SocketContext";
 import io from "socket.io-client";
 import axios from "./config/axiosConfig";
 
+// import PrivateRoute from "./components/PrivateRoute";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
@@ -14,11 +15,9 @@ import Home from "./components/Home";
 const socket = io();
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem("token"));
-  //initialize socket.io
+  axios.defaults.baseURL = "http://localhost:8000";
+
   useEffect(() => {
-    if (token)
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     socket.on("connect", () => {
       console.log("socket is connected");
     });
@@ -49,3 +48,10 @@ function App() {
 }
 
 export default App;
+
+// if (localStorage.getItem("token"))
+// console.log(localStorage.getItem("token"));
+
+// axios.defaults.headers.common["Authorization"] = `${localStorage.getItem(
+//   "token"
+// )}`;

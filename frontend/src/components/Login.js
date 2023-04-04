@@ -63,26 +63,37 @@
 
 // export default Login;
 
+// import api from "../config/api";
+// import { Navigate } from "react-router-dom";
+
 import React, { useState } from "react";
 import axios from "axios";
-import api from "../config/api";
+// import api from "../config/api";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const TOKEN_KEY = "my_token";
+  // const TOKEN_KEY = "my_token";
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const response = await axios.post("/login", { email, password });
+      // const config = {
+      //   headers: {
+      //     Authorization: `Bearer ${localStorage.getItem("token")}`,
+      //   },
+      // };
+      const response = await axios.post("http://localhost:8000/login", {
+        email,
+        password,
+      });
+      const { token } = await response.data;
+      localStorage.setItem("token", token);
+      // setToken(token);
 
-      localStorage.setItem(TOKEN_KEY, response.data.token);
-      console.log("Token in localStorage: ", localStorage.getItem(TOKEN_KEY));
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${response.data.token}`;
+      alert("token: " + localStorage.getItem("token"));
+
       window.location.href = "http://localhost:8000/dashboard";
     } catch (error) {
       if (error.response) {

@@ -47,10 +47,9 @@ function Dashboard() {
 
     try {
       axios
-        .post("/logout")
+        .post("http://localhost:8000/logout")
         .then((response) => {
           localStorage.removeItem("token");
-          window.location.href = "/login";
         })
         .catch((error) => {
           console.log(error);

@@ -7,6 +7,21 @@ const cors = require("cors");
 const path = require("path");
 const app = express();
 
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; connect-src 'self' http://localhost:3000"
+  );
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self' http://localhost:3000"
+  );
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Authorization");
+  res.setHeader("Access-Control-Allow-Methods", "GET");
+  next();
+});
+
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 
@@ -35,7 +50,7 @@ app.use(express.json());
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000/*"],
     methods: ["GET", "POST"],
     credentials: true,
   })
@@ -154,20 +169,75 @@ const verifyJWT = (req, res, next) => {
   }
 };
 
+// const verify = (req, res, next) => {
+//   console.log(req.headers);
+//   passport.authenticate("jwt", { session: false }, (err, user, info) => {
+//     if (err) {
+//       return next(err);
+//     }
+//     if (!user) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
+//     // Store the user object in the request object for later use
+//     req.user = user;
+//     // Call the next middleware
+//     return next();
+//   })(req, res, next);
+// };
+
+// const verify = (req, res, next) => {
+//   // Get the token from the Authorization header
+//   const authHeader = req.headers.authorization;
+//   const token = authHeader && authHeader.split(" ")[1];
+
+//   if (!token) {
+//     return res.status(401).json({ message: "missing token" });
+//   }
+
+//   try {
+//     // Verify the token using your secret key
+//     const decoded = jwt.verify(token, secret);
+//     req.user = decoded;
+//     next();
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(401).json({ message: "Unauthorized" });
+//   }
+// };
+
+// const verify = (req, res, next) => {
+//   if (req.session) {
+//     const token = JSON.stringify(req.session.user.token);
+//     console.log(JSON.stringify(req.session.user.token));
+
+//     jwt.verify(token, secret, (err, decoded) => {
+//       if (err) {
+//         res.json({ auth: false, message: "authentication failed" });
+//       } else {
+//         req.userId = decoded.id;
+//         next();
+//       }
+//     });
+//   }
+
+//   console.log("auth denied");
+// };
 const verify = (req, res, next) => {
-  console.log(req.headers);
-  passport.authenticate("jwt", { session: false }, (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    // Store the user object in the request object for later use
-    req.user = user;
-    // Call the next middleware
-    return next();
-  })(req, res, next);
+  if (req.session && req.session.user && req.session.user.token) {
+    const token = req.session.user.token;
+    console.log(token);
+
+    jwt.verify(token, secret, (err, decoded) => {
+      if (err) {
+        res.json({ auth: false, message: "authentication failed" });
+      } else {
+        req.userId = decoded.id;
+        next();
+      }
+    });
+  } else {
+    return res.redirect("http://localhost:8000/login");
+  }
 };
 
 // app.get(
@@ -188,7 +258,7 @@ app.get("/isUserAuth", verifyJWT, (req, res) => {
 app.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(req.headers);
+    // console.log(req.headers);
     if (!(validateEmail(email) && validatePassword(password))) {
       console.log("invalid or empty fields");
       res.status(401).json({ error: "invalid or empty fields" });
@@ -211,12 +281,23 @@ app.post("/login", loginLimiter, async (req, res) => {
           .json({ error: "invalid password or incorect password" });
       }
 
+      // const token = jwt.sign({ id: user._id }, secret, {
+      //   expiresIn: 60 * 60 * 24,
+      // });
+      // console.log("login was successful");
+      // req.session.user = user;
+      // console.log(req.session.user);
+      // res.json({ token, error: null, user });
       const token = jwt.sign({ id: user._id }, secret, {
         expiresIn: 60 * 60 * 24,
       });
+
       console.log("login was successful");
-      req.session.user = user;
+
+      req.session.user = { userId: user._id, token: token };
+
       console.log(req.session.user);
+
       res.json({ token, error: null, user });
     }
   } catch (error) {
@@ -310,22 +391,54 @@ app.get(
   }
 );
 
-// Define the logout route
-app.post("/logout", (req, res) => {
-  // Invalidate the token on the server-side
-  const token = req.headers.authorization.split(" ")[1];
-  jwt.verify(token, secret, (err, decoded) => {
+// // Define the logout route
+// app.post("/logout", (req, res) => {
+//   // Invalidate the token on the server-side
+//   const token = req.headers.authorization.split(" ")[1];
+//   jwt.verify(token, secret, (err, decoded) => {
+//     if (err) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
+//     // Calculate the remaining time until token expiration
+//     const expirationTime = 60000 * 5;
+//     // Set the token expiration time to an earlier time to invalidate it
+//     const expiresIn = expirationTime;
+//     const newToken = jwt.sign({ id: decoded.id }, secret, {
+//       expiresIn,
+//     });
+//     return res.json({ message: "Logout successful", token: newToken });
+//   });
+// });
+// app.post("/logout", (req, res) => {
+//   // Invalidate the token on the server-side
+//   // const token = req.headers.authorization.split(" ")[1];
+//   // jwt.verify(token, secret, (err, decoded) => {
+//   //   if (err) {
+//   //     return res.status(401).json({ message: "Unauthorized" });
+//   //   }
+//   //   // Destroy the session
+//   //   return res.json({ message: "Logout successful" });
+//   // });
+//   // res.clearCookie("userId");
+//   // res.end();
+
+//   // req.session.destroy(function (err) {
+//   //   if (err) {
+//   //     console.log(err);
+//   //   } else {
+//   //     res.clearCookie("session");
+//   //     res.redirect("/");
+//   //   }
+//   // });
+// });
+
+app.post("/logout", function (req, res) {
+  req.session.destroy(function (err) {
     if (err) {
-      return res.status(401).json({ message: "Unauthorized" });
+      console.log(err);
+    } else {
+      return res.redirect("http://localhost:8000/login");
     }
-    // Calculate the remaining time until token expiration
-    const expirationTime = 60000 * 5;
-    // Set the token expiration time to an earlier time to invalidate it
-    const expiresIn = expirationTime;
-    const newToken = jwt.sign({ id: decoded.id }, secret, {
-      expiresIn,
-    });
-    return res.json({ message: "Logout successful", token: newToken });
   });
 });
 
