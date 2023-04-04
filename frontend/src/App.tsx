@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import "./styles/App.css";
 
 import SocketContext from "./config/SocketContext";
 import io from "socket.io-client";
-import axios from "axios";
+import axios from "./config/axiosConfig";
 
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -14,8 +14,11 @@ import Home from "./components/Home";
 const socket = io();
 
 function App() {
+  const [token, setToken] = useState(localStorage.getItem("token"));
   //initialize socket.io
   useEffect(() => {
+    if (token)
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     socket.on("connect", () => {
       console.log("socket is connected");
     });

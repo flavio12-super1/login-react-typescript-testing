@@ -3,7 +3,7 @@ const router = express.Router();
 
 router.post("/", async (req, res, next) => {
   try {
-    console.log(req.body.data);
+    // console.log(req.body.data);
     res.send({ message: "hello world : )" });
   } catch (err) {
     next(err);
