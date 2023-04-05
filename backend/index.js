@@ -7,28 +7,15 @@ const cors = require("cors");
 const path = require("path");
 const http = require("http");
 const app = express();
-
 const server = require("http").createServer(app);
-
-app.use((req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src 'self'; connect-src 'self' http://localhost:3000 http://localhost:8000"
-  );
-
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "Authorization");
-  res.setHeader("Access-Control-Allow-Methods", "GET");
-  next();
-});
-
-const cookieParser = require("cookie-parser");
 const session = require("express-session");
+var MongoDBStore = require("connect-mongodb-session")(session);
 
 const port = process.env.PORT || 8000;
 
 dotenv.config();
-
+const mongoose = require("mongoose");
+const dburl = process.env.DBURL;
 // Create a rate limiter with the desired configuration
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -55,8 +42,17 @@ app.use(
     credentials: true,
   })
 );
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
+
+var store = new MongoDBStore({
+  uri: dburl,
+  collection: "mySessions",
+});
+
+// Catch errors
+store.on("error", function (error) {
+  console.log(error);
+});
 
 app.use(
   session({
@@ -64,8 +60,9 @@ app.use(
     secret: "flavioHerrera",
     resave: false,
     saveUninitialized: false,
+    store: store,
     cookie: {
-      expires: 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60 * 24,
       secure: false,
     },
   })
@@ -99,12 +96,12 @@ passport.use(
   })
 );
 
-// Connect to MongoDB using Mongoose and create a User schema and model for storing users' information in the database:
+// // Connect to MongoDB using Mongoose and create a User schema and model for storing users' information in the database:
 
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
+// const dburl = process.env.DBURL;
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-const dburl = process.env.DBURL;
 
 mongoose.connect(dburl, {
   useNewUrlParser: true,
@@ -146,15 +143,6 @@ const validateEmail = (email) => {
 const validatePassword = (password) => {
   return /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[a-zA-Z\d]{8,}$/.test(password);
 };
-// app.get("/loginStatus", (req, res) => {
-//   console.log("body: " + req.user);
-//   if (req.session.user) {
-//     console.log("user: " + req.session.user.token);
-//     res.send({ loggedIn: true, user: req.session.user });
-//   } else {
-//     res.send({ loggedIn: false });
-//   }
-// });
 
 const verifyJWT = (req, res, next) => {
   const token = req.headers["x-access-token"];
@@ -340,36 +328,7 @@ app.get("/logout", function (req, res) {
     }
   });
 });
-// app.post(
-//   "/logout",
-//   function (req, res, next) {
-//     req.session.destroy(function (err) {
-//       if (err) {
-//         console.log(err);
-//         next(err); // pass error to error handler
-//       } else {
-//         req.logout();
-//         next(); // pass control to the next middleware
-//       }
-//     });
-//   },
-//   function (req, res) {
-//     res.redirect("/login");
-//   }
-// );
 
 server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
-});
-
-const redis = require("redis");
-
-const client = redis.createClient({
-  host: "localhost",
-
-  port: 6379,
-});
-
-client.on("error", (err) => {
-  console.error(err);
 });
