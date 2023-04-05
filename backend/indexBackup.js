@@ -13,7 +13,11 @@ const server = require("http").createServer(app);
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; connect-src 'self' http://localhost:3000 http://localhost:8000"
+    "default-src 'self'; connect-src 'self' http://localhost:3000"
+  );
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self' http://localhost:8000"
   );
 
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -45,12 +49,12 @@ const loginLimiter = rateLimit({
 });
 
 // Use the helmet middleware
-// app.use(helmet());
+app.use(helmet());
 app.use(express.json());
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000/"],
+    origin: ["http://localhost:3000/*"],
     methods: ["GET", "POST"],
     credentials: true,
   })
@@ -146,15 +150,13 @@ const validateEmail = (email) => {
 const validatePassword = (password) => {
   return /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[a-zA-Z\d]{8,}$/.test(password);
 };
-// app.get("/loginStatus", (req, res) => {
-//   console.log("body: " + req.user);
-//   if (req.session.user) {
-//     console.log("user: " + req.session.user.token);
-//     res.send({ loggedIn: true, user: req.session.user });
-//   } else {
-//     res.send({ loggedIn: false });
-//   }
-// });
+app.get("/loginStatus", (req, res) => {
+  if (req.session.user) {
+    res.send({ loggedIn: true, user: req.session.user });
+  } else {
+    res.send({ loggedIn: false });
+  }
+});
 
 const verifyJWT = (req, res, next) => {
   const token = req.headers["x-access-token"];
@@ -172,6 +174,59 @@ const verifyJWT = (req, res, next) => {
   }
 };
 
+// const verify = (req, res, next) => {
+//   console.log(req.headers);
+//   passport.authenticate("jwt", { session: false }, (err, user, info) => {
+//     if (err) {
+//       return next(err);
+//     }
+//     if (!user) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
+//     // Store the user object in the request object for later use
+//     req.user = user;
+//     // Call the next middleware
+//     return next();
+//   })(req, res, next);
+// };
+
+// const verify = (req, res, next) => {
+//   // Get the token from the Authorization header
+//   const authHeader = req.headers.authorization;
+//   const token = authHeader && authHeader.split(" ")[1];
+
+//   if (!token) {
+//     return res.status(401).json({ message: "missing token" });
+//   }
+
+//   try {
+//     // Verify the token using your secret key
+//     const decoded = jwt.verify(token, secret);
+//     req.user = decoded;
+//     next();
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(401).json({ message: "Unauthorized" });
+//   }
+// };
+
+// const verify = (req, res, next) => {
+//   if (req.session) {
+//     const token = JSON.stringify(req.session.user.token);
+//     console.log(JSON.stringify(req.session.user.token));
+
+//     jwt.verify(token, secret, (err, decoded) => {
+//       if (err) {
+//         res.json({ auth: false, message: "authentication failed" });
+//       } else {
+//         req.userId = decoded.id;
+//         next();
+//       }
+//     });
+//   }
+
+//   console.log("auth denied");
+// };
 const verify = (req, res, next) => {
   if (req.session && req.session.user && req.session.user.token) {
     const token = req.session.user.token;
@@ -186,9 +241,18 @@ const verify = (req, res, next) => {
       }
     });
   } else {
-    res.redirect("/login");
+    return res.redirect("http://localhost:8000/login");
   }
 };
+
+// app.get(
+//   "/verify",
+//   passport.authenticate("jwt", { session: false }),
+//   (req, res) => {
+//     console.log("body: " + req.user);
+//     res.json({ message: "success" });
+//   }
+// );
 
 //test route
 app.get("/isUserAuth", verifyJWT, (req, res) => {
@@ -222,6 +286,13 @@ app.post("/login", loginLimiter, async (req, res) => {
           .json({ error: "invalid password or incorect password" });
       }
 
+      // const token = jwt.sign({ id: user._id }, secret, {
+      //   expiresIn: 60 * 60 * 24,
+      // });
+      // console.log("login was successful");
+      // req.session.user = user;
+      // console.log(req.session.user);
+      // res.json({ token, error: null, user });
       const token = jwt.sign({ id: user._id }, secret, {
         expiresIn: 60 * 60 * 24,
       });
@@ -230,7 +301,7 @@ app.post("/login", loginLimiter, async (req, res) => {
 
       req.session.user = { userId: user._id, token: token };
 
-      // console.log("session: " + req.user);
+      console.log(req.session.user);
 
       res.json({ token, error: null, user });
     }
@@ -322,41 +393,153 @@ app.get(
     res.json({ message: "success" });
   }
 );
-app.get(
-  "/loginStatus",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    console.log("body: " + req.user.email);
-    res.send({ loggedIn: true, user: req.user });
-  }
-);
 
-app.get("/logout", function (req, res) {
+// // Define the logout route
+// app.post("/logout", (req, res) => {
+//   // Invalidate the token on the server-side
+//   const token = req.headers.authorization.split(" ")[1];
+//   jwt.verify(token, secret, (err, decoded) => {
+//     if (err) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
+//     // Calculate the remaining time until token expiration
+//     const expirationTime = 60000 * 5;
+//     // Set the token expiration time to an earlier time to invalidate it
+//     const expiresIn = expirationTime;
+//     const newToken = jwt.sign({ id: decoded.id }, secret, {
+//       expiresIn,
+//     });
+//     return res.json({ message: "Logout successful", token: newToken });
+//   });
+// });
+// app.post("/logout", (req, res) => {
+//   // Invalidate the token on the server-side
+//   // const token = req.headers.authorization.split(" ")[1];
+//   // jwt.verify(token, secret, (err, decoded) => {
+//   //   if (err) {
+//   //     return res.status(401).json({ message: "Unauthorized" });
+//   //   }
+//   //   // Destroy the session
+//   //   return res.json({ message: "Logout successful" });
+//   // });
+//   // res.clearCookie("userId");
+//   // res.end();
+
+//   // req.session.destroy(function (err) {
+//   //   if (err) {
+//   //     console.log(err);
+//   //   } else {
+//   //     res.clearCookie("session");
+//   //     res.redirect("/");
+//   //   }
+//   // });
+// });
+
+// app.set("trust proxy", (ip) => {
+//   if (ip === "127.0.0.1" || ip === "123.123.123.123")
+//     return true; // trusted IPs
+//   else return false;
+// });
+
+app.post("/logout", function (req, res) {
   req.session.destroy(function (err) {
     if (err) {
       console.log(err);
     } else {
-      res.redirect("/login");
+      return res.redirect("http://localhost:8000/login");
     }
   });
 });
-// app.post(
-//   "/logout",
-//   function (req, res, next) {
-//     req.session.destroy(function (err) {
-//       if (err) {
-//         console.log(err);
-//         next(err); // pass error to error handler
-//       } else {
-//         req.logout();
-//         next(); // pass control to the next middleware
-//       }
-//     });
-//   },
-//   function (req, res) {
-//     res.redirect("/login");
-//   }
-// );
+
+//arcgis
+const fs = require("fs");
+const Papa = require("papaparse");
+
+function generateFinalCsvFile(csvDataLibraryRooms, csvDataUnitsNames) {
+  return new Promise((resolve) => {
+    for (let i = 0; i < csvDataLibraryRooms.length; i++) {
+      let objectId = csvDataLibraryRooms[i].GUID;
+      let objectName = "";
+
+      for (let j = 0; j < csvDataUnitsNames.length; j++) {
+        if (csvDataUnitsNames[j].id == objectId) {
+          objectName = csvDataUnitsNames[j].name.substring(0, 3);
+          csvDataLibraryRooms[i].Name = objectName; //set the name of the room
+
+          const timestamp = csvDataLibraryRooms[i].CreationDate; // timestamp from CSV file
+          const dateObj = new Date(`${timestamp} GMT-0000`);
+          const options = { timeZone: "America/Los_Angeles" }; // specify timezone as options
+          const localTime = dateObj.toLocaleString("en-US", options); // convert the timestamp to local time
+          csvDataLibraryRooms[i].CreationDate = localTime;
+
+          const timestamp2 = csvDataLibraryRooms[i].EditDate; // timestamp from CSV file
+          const dateObj2 = new Date(`${timestamp2} GMT-0000`);
+          const options2 = { timeZone: "America/Los_Angeles" }; // specify timezone as options
+          const localTime2 = dateObj2.toLocaleString("en-US", options2); // convert the timestamp to local time
+          csvDataLibraryRooms[i].EditDate = localTime2;
+          delete csvDataLibraryRooms[i].headCount;
+        }
+      }
+    }
+
+    resolve(csvDataLibraryRooms);
+  });
+}
+
+function parseCsvDataLibraryRooms(csvDataUnitsNames) {
+  const csvFilePath = "./libraryRooms_13.csv";
+
+  const file = fs.createReadStream(csvFilePath);
+  var csvDataLibraryRooms = [];
+
+  return new Promise((resolve) => {
+    Papa.parse(file, {
+      header: true,
+      step: function (result) {
+        csvDataLibraryRooms.push(result.data);
+      },
+      complete: function (results, file) {
+        generateFinalCsvFile(csvDataLibraryRooms, csvDataUnitsNames).then(
+          (result) => {
+            resolve(result);
+          }
+        );
+      },
+    });
+  });
+}
+
+function parseCsvDataUnits() {
+  const csvFilePath = "./Units_2.csv";
+  const file = fs.createReadStream(csvFilePath);
+
+  return new Promise((resolve) => {
+    var csvDataUnitsNames = [];
+
+    Papa.parse(file, {
+      header: true,
+      step: function (result) {
+        csvDataUnitsNames.push({
+          name: result.data.Name,
+          id: result.data.GlobalID,
+        });
+      },
+      complete: function (results, file) {
+        parseCsvDataLibraryRooms(csvDataUnitsNames).then((result) => {
+          resolve(result);
+        });
+      },
+    });
+  });
+}
+
+app.get("/chart", (req, res) => {
+  parseCsvDataUnits().then((result) => {
+    // console.log(result);
+    res.send(result);
+  });
+});
+//end of chartjs
 
 server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

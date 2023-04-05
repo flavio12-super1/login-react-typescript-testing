@@ -15,12 +15,6 @@ function Dashboard() {
     // const token = localStorage.getItem("token");
     // setToken(localStorage.getItem("token"));
 
-    //get login info
-    axios.get("http://localhost:8000/loginStatus").then((response) => {
-      if (response.data.loggedIn) setUsername(response.data.user.email);
-      // console.log(response);
-    });
-
     if (localStorage.getItem("token")) {
       axios.defaults.headers.common[
         "Authorization"
@@ -37,6 +31,13 @@ function Dashboard() {
         .catch((error) => {
           console.log(error);
         });
+      //get login info
+      axios.get("/loginStatus").then((response) => {
+        if (response.data.loggedIn) {
+          setUsername(response.data.user.email);
+        }
+        // console.log(response);
+      });
     } else {
       window.location.href = "/login";
     }
@@ -47,9 +48,10 @@ function Dashboard() {
 
     try {
       axios
-        .post("http://localhost:8000/logout")
-        .then((response) => {
+        .get("http://localhost:8000/logout")
+        .then((res) => {
           localStorage.removeItem("token");
+          window.location.replace(res.request.responseURL);
         })
         .catch((error) => {
           console.log(error);
