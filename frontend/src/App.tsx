@@ -34,7 +34,14 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        backgroundColor: "#d4d2d0",
+        height: "100vh",
+      }}
+    >
       <SocketContext.Provider value={{ socket }}>
         <Routes>
           <Route path="/" element={<Home />} />

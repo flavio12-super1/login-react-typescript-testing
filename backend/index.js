@@ -98,8 +98,6 @@ passport.use(
 
 // // Connect to MongoDB using Mongoose and create a User schema and model for storing users' information in the database:
 
-// const mongoose = require("mongoose");
-// const dburl = process.env.DBURL;
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
@@ -145,18 +143,23 @@ const validatePassword = (password) => {
 };
 
 const verifyJWT = (req, res, next) => {
-  const token = req.headers["x-access-token"];
-  if (!token) {
-    res.send("token not found");
+  if (req.headers.authorization) {
+    console.log("verifyJWT " + req.headers.authorization);
+    const token = req.headers.authorization.split(" ")[1];
+    if (!token) {
+      res.send("token not found");
+    } else {
+      jwt.verify(token, secret, (err, decoded) => {
+        if (err) {
+          res.json({ auth: false, message: "authentication failed" });
+        } else {
+          req.userId = decoded.id;
+          next();
+        }
+      });
+    }
   } else {
-    jwt.verify(token, secret, (err, decoded) => {
-      if (err) {
-        res.json({ auth: false, message: "authentication failed" });
-      } else {
-        req.userId = decoded.id;
-        next();
-      }
-    });
+    res.send("user is not authorized");
   }
 };
 
@@ -180,7 +183,7 @@ const verify = (req, res, next) => {
 
 //test route
 app.get("/isUserAuth", verifyJWT, (req, res) => {
-  res.send("user is authenticated to make api requests");
+  res.json({ message: "user is authenticated to make api requests" });
 });
 
 // Create login and sign up endpoints:
@@ -257,13 +260,16 @@ app.post("/signup", loginLimiter, async (req, res) => {
 
 // Routes
 const testRoutes = require("./routes/test");
-app.use("/test", testRoutes);
+app.use("/test", verifyJWT, testRoutes);
 // Routes
 const chartRoutes = require("./routes/chart");
-app.use("/chart", chartRoutes);
+app.use("/chart", verifyJWT, chartRoutes);
 // Routes
 const uploadRoutes = require("./routes/upload-xlsx");
-app.use("/upload", uploadRoutes);
+app.use("/upload", verifyJWT, uploadRoutes);
+// Routes
+const deleteRoute = require("./routes/deleteRoute");
+app.use("/delete", verifyJWT, deleteRoute);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

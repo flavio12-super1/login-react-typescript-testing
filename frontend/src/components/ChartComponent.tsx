@@ -44,13 +44,19 @@ interface MyData {
   Editor: string;
 }
 
+function eachFloor(myCount: string) {
+  return parseInt(myCount);
+}
+
 function groupDataByDay(data: MyData[]) {
   const groups: { [key: string]: number } = {};
 
   data.forEach((datum) => {
     const date = new Date(datum.CreationDate);
     const day = date.toDateString();
-    const count = parseInt(datum.Count);
+    // const count = parseInt(datum.Count);
+    console.log(datum.Name);
+    const count = eachFloor(datum.Count);
 
     if (!groups[day]) {
       groups[day] = 0;
