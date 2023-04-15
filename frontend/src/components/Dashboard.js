@@ -38,8 +38,8 @@ function Dashboard() {
     if (data.fileName === "units") {
       console.log("units data added");
     } else if (data.fileName === "library") {
-      console.log(data.data);
-      setData(data.data);
+      console.log(data.joinData);
+      setData(data.joinData);
       console.log("library file added");
     }
   };
@@ -85,7 +85,7 @@ function Dashboard() {
 
         setGraph(fileData);
 
-        console.log(fileData);
+        // console.log(fileData);
       })
       .catch((error) => {
         console.log(error);
@@ -153,27 +153,47 @@ function Dashboard() {
           },
         })
         .then((res) => {
-          console.log(res.data.data);
-          const fileExtension = selectedFile.name.split(".").pop();
-          if (fileExtension === "xlsx") {
-            setGraph(res.data);
-            if (option === "units") {
-              setUnitsFileName(res.data.fileName);
-            } else if (option === "library") {
-              setLibraryFileName(res.data.fileName);
-            }
-          } else if (fileExtension === "csv") {
-            const reader = new FileReader();
-            reader.onload = () => {
-              setGraph(res.data);
-              if (option === "units") {
-                setUnitsFileName(res.data.fileName);
-              } else if (option === "library") {
-                setLibraryFileName(res.data.fileName);
-              }
-            };
-            reader.readAsText(selectedFile);
-          }
+          // console.log(res.data.data);
+          // const fileExtension = selectedFile.name.split(".").pop();
+          // if (fileExtension === "xlsx") {
+          //   setGraph(res.data);
+          //   if (option === "units") {
+          //     setUnitsFileName(res.data.fileName);
+          //   } else if (option === "library") {
+          //     setLibraryFileName(res.data.fileName);
+          //   }
+          // } else if (fileExtension === "csv") {
+          //   const reader = new FileReader();
+          //   reader.onload = () => {
+          //     setGraph(res.data);
+          //     if (option === "units") {
+          //       setUnitsFileName(res.data.fileName);
+          //     } else if (option === "library") {
+          //       setLibraryFileName(res.data.fileName);
+          //     }
+          //   };
+          //   reader.readAsText(selectedFile);
+          // }
+          axios
+            .get("/upload/file", {
+              params: { fileDataZero: "units", fileName: "library" },
+            })
+            .then((response) => {
+              const fileNameZero = response.data.fileNameZero;
+              const fileName = response.data.fileName;
+
+              const fileData = response.data;
+              setUnitsFileName(fileNameZero);
+              setLibraryFileName(fileName);
+              console.log("data state has been updated");
+
+              setGraph(fileData);
+
+              // console.log(fileData);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         })
         .catch((err) => {
           console.error(err);
@@ -252,44 +272,116 @@ function Dashboard() {
   };
 
   const elements1 = [
-    { id: 1, style: { top: 100, left: 50 } },
-    { id: 2, style: { top: 390, left: 630 } },
+    { id: "157", style: { top: 100, left: 50 } },
+    { id: "190", style: { top: 390, left: 630 } },
   ];
 
   const elements2 = [
-    { id: 1, style: { top: 380, left: 50 } },
-    { id: 2, style: { top: 405, left: 100 } },
-    { id: 3, style: { top: 405, left: 140 } },
-    { id: 4, style: { top: 405, left: 170 } },
-    { id: 5, style: { top: 405, left: 210 } },
-    { id: 6, style: { top: 405, left: 240 } },
-    { id: 7, style: { top: 405, left: 280 } },
-    { id: 8, style: { top: 405, left: 310 } },
-    { id: 9, style: { top: 405, left: 400 } },
+    { id: "260", style: { top: 380, left: 50 } },
+    { id: "262", style: { top: 405, left: 100 } },
+    { id: "264", style: { top: 405, left: 140 } },
+    { id: "266", style: { top: 405, left: 170 } },
+    { id: "268", style: { top: 405, left: 210 } },
+    { id: "272", style: { top: 405, left: 240 } },
+    { id: "274", style: { top: 405, left: 280 } },
+    { id: "276", style: { top: 405, left: 310 } },
+    { id: "S2-5", style: { top: 405, left: 400 } },
   ];
 
   const elements3 = [
-    { id: 1, style: { top: 360, left: 50 } },
-    { id: 2, style: { top: 385, left: 140 } },
-    { id: 3, style: { top: 385, left: 205 } },
-    { id: 4, style: { top: 385, left: 240 } },
-    { id: 5, style: { top: 385, left: 275 } },
-    { id: 6, style: { top: 385, left: 310 } },
-    { id: 7, style: { top: 385, left: 385 } },
+    { id: "360", style: { top: 360, left: 50 } },
+    { id: "362", style: { top: 385, left: 140 } },
+    { id: "368", style: { top: 385, left: 205 } },
+    { id: "372", style: { top: 385, left: 240 } },
+    { id: "374", style: { top: 385, left: 275 } },
+    { id: "376", style: { top: 385, left: 310 } },
+    { id: "380", style: { top: 385, left: 385 } },
   ];
 
   const elements4 = [
-    { id: 1, style: { top: 380, left: 65 } },
-    { id: 2, style: { top: 405, left: 130 } },
-    { id: 3, style: { top: 405, left: 205 } },
-    { id: 4, style: { top: 405, left: 275 } },
-    { id: 5, style: { top: 405, left: 350 } },
-    { id: 6, style: { top: 230, left: 350 } },
-    { id: 7, style: { top: 125, left: 350 } },
-    { id: 8, style: { top: 125, left: 570 } },
+    { id: "460", style: { top: 380, left: 65 } },
+    { id: "464", style: { top: 405, left: 130 } },
+    { id: "470", style: { top: 405, left: 205 } },
+    { id: "474", style: { top: 405, left: 275 } },
+    { id: "480", style: { top: 405, left: 350 } },
+    { id: "480A", style: { top: 230, left: 350 } },
+    { id: "487A", style: { top: 125, left: 350 } },
+    { id: "489A", style: { top: 125, left: 570 } },
   ];
 
   const elementsList = [elements1, elements2, elements3, elements4];
+
+  const PopUp = () => {
+    //to get all elements of that popUP
+    // const filteredData = data.filter((item) => item.Name === popUp);
+
+    // const content = filteredData.map((item) => (
+    //   <div key={item.GUID}>
+    //     <h2>{item.Name}</h2>
+    //     <p>Count: {item.Count}</p>
+    //     <p>Creation Date: {item.CreationDate}</p>
+    //     <p>Creator: {item.Creator}</p>
+    //     <p>Edit Date: {item.EditDate}</p>
+    //     <p>Editor: {item.Editor}</p>
+    //   </div>
+    // ));
+
+    // return <div>{content}</div>;
+
+    //shows only one
+    // const objectToMap = data.find((obj) => obj.Name === popUp);
+
+    // return (
+    //   <div>
+    //     {objectToMap && (
+    //       <ul>
+    //         <li>Count: {objectToMap.Count}</li>
+    //         <li>Creation Date: {objectToMap.CreationDate}</li>
+    //         <li>Creator: {objectToMap.Creator}</li>
+    //         <li>Edit Date: {objectToMap.EditDate}</li>
+    //         <li>Editor: {objectToMap.Editor}</li>
+    //       </ul>
+    //     )}
+    //   </div>
+    // );
+    const filteredObjects = data.filter((obj) => obj.Name === popUp);
+
+    let totalCount = 0;
+    let earliestCreationDate = null;
+    let latestEditDate = null;
+    let creator = null;
+    let editor = null;
+
+    filteredObjects.forEach((obj) => {
+      totalCount += parseInt(obj.Count);
+      const creationDate = new Date(obj.CreationDate);
+      const editDate = new Date(obj.EditDate);
+      if (!earliestCreationDate || creationDate < earliestCreationDate) {
+        earliestCreationDate = creationDate;
+      }
+      if (!latestEditDate || editDate > latestEditDate) {
+        latestEditDate = editDate;
+      }
+    });
+
+    return (
+      <div>
+        <p>{popUp}</p>
+        <p>Total Count: {totalCount}</p>
+        <p>
+          Earliest Creation Date:
+          {earliestCreationDate && earliestCreationDate.toLocaleString()}
+        </p>
+        <p>
+          Latest Edit Date: {latestEditDate && latestEditDate.toLocaleString()}
+        </p>
+        <p>
+          Creator: {filteredObjects.length > 0 && filteredObjects[0].Creator}
+        </p>
+        <p>Editor: {filteredObjects.length > 0 && filteredObjects[0].Editor}</p>
+      </div>
+    );
+  };
 
   function MyComponent() {
     return (
@@ -434,7 +526,11 @@ function Dashboard() {
                 </div>
 
                 <div className="popup">
-                  {popUp !== "" ? popUp : <div>no popup has been selected</div>}
+                  {popUp !== "" ? (
+                    <PopUp />
+                  ) : (
+                    <div>no popup has been selected</div>
+                  )}
                 </div>
               </div>
               <div style={{ width: "700px" }}>{renderChart()}</div>

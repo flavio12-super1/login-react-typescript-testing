@@ -81,7 +81,8 @@ function generateFinalCsvFile(csvDataLibraryRooms, csvDataUnitsNames) {
 
       for (let j = 0; j < csvDataUnitsNames.length; j++) {
         if (csvDataUnitsNames[j].id == objectId) {
-          objectName = csvDataUnitsNames[j].name.substring(0, 3);
+          // objectName = csvDataUnitsNames[j].name.substring(0, 3);
+          objectName = csvDataUnitsNames[j].name.split("\r")[0];
           csvDataLibraryRooms[i].Name = objectName; //set the name of the room
 
           const timestamp = csvDataLibraryRooms[i].CreationDate; // timestamp from CSV file

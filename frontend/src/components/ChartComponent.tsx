@@ -1,4 +1,5 @@
 import React from "react";
+import html2canvas from "html2canvas";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -75,6 +76,16 @@ interface MyChartProps {
   data: MyData[];
 }
 
+function handleDownload() {
+  const chartElement = document.getElementById("myChart") as HTMLCanvasElement; // replace 'my-chart' with the ID of your chart canvas element
+  html2canvas(chartElement).then((canvas) => {
+    const link = document.createElement("a");
+    link.download = "chart.png";
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
+
 export function MyChart({ data }: MyChartProps) {
   const { labels, counts } = groupDataByDay(data);
 
@@ -89,5 +100,10 @@ export function MyChart({ data }: MyChartProps) {
     ],
   };
 
-  return <Bar data={chartData} options={options} />;
+  return (
+    <div>
+      <Bar data={chartData} options={options} id="myChart" />
+      <button onClick={handleDownload}>Download Chart</button>
+    </div>
+  );
 }
