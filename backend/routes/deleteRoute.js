@@ -7,7 +7,10 @@ router.post("/file", async (req, res, next) => {
   const fileName = req.body.data.fileName;
   console.log(fileName);
 
-  const filePath = path.join(__dirname, `../downloads/${fileName}/${fileName}`);
+  const filePath = path.join(
+    __dirname,
+    `../downloads/${fileName}/${fileName}.csv`
+  );
 
   try {
     if (fs.existsSync(filePath)) {

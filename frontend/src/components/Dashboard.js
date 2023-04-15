@@ -79,7 +79,6 @@ function Dashboard() {
         const fileName = response.data.fileName;
 
         const fileData = response.data;
-        console.log(fileNameZero);
         setUnitsFileName(fileNameZero);
         setLibraryFileName(fileName);
         console.log("data state has been updated");
@@ -157,7 +156,6 @@ function Dashboard() {
           console.log(res.data.data);
           const fileExtension = selectedFile.name.split(".").pop();
           if (fileExtension === "xlsx") {
-            // setData(res.data.data);
             setGraph(res.data);
             if (option === "units") {
               setUnitsFileName(res.data.fileName);
@@ -167,7 +165,6 @@ function Dashboard() {
           } else if (fileExtension === "csv") {
             const reader = new FileReader();
             reader.onload = () => {
-              // setData(res.data.data);
               setGraph(res.data);
               if (option === "units") {
                 setUnitsFileName(res.data.fileName);

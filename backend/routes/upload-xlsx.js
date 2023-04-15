@@ -47,9 +47,8 @@ router.post("/file", upload.single("file"), async (req, res, next) => {
         // Convert CSV data to JSON object
         data = await csv().fromString(csvData);
 
-        // const fileName = `${Date.now()}-${file.originalname}`;
         fileName = `${path}`;
-        fs.writeFileSync(`downloads/${path}/${fileName}`, csvData);
+        fs.writeFileSync(`downloads/${path}/${fileName}.csv`, csvData);
       } else if (fileType === "text/csv") {
         // Convert CSV file to JSON object
         data = await csv().fromString(file.buffer.toString());
@@ -60,9 +59,8 @@ router.post("/file", upload.single("file"), async (req, res, next) => {
         );
 
         // Write the file to the file system
-        // const fileName = `${Date.now()}-${file.originalname}`;
         fileName = `${path}`;
-        fs.writeFileSync(`downloads/${path}/${fileName}`, file.buffer);
+        fs.writeFileSync(`downloads/${path}/${fileName}.csv`, file.buffer);
       }
       console.log(fileName);
 
@@ -73,118 +71,85 @@ router.post("/file", upload.single("file"), async (req, res, next) => {
   }
 });
 
-// router.get("/file", async (req, res, next) => {
-//   try {
-//     const fileName = req.query.fileName;
-//     // const fileName = req.params.fileName;
+const Papa = require("papaparse");
 
-//     // Check if the file exists
-//     if (!fs.existsSync(`downloads/${fileName}/${fileName}`)) {
-//       res.status(404).send("File not found.");
-//     } else {
-//       // Read the file from the file system
-//       const fileData = fs.readFileSync(`downloads/${fileName}/${fileName}`);
+function generateFinalCsvFile(csvDataLibraryRooms, csvDataUnitsNames) {
+  return new Promise((resolve) => {
+    for (let i = 0; i < csvDataLibraryRooms.length; i++) {
+      let objectId = csvDataLibraryRooms[i].GUID;
+      let objectName = "";
 
-//       // Set the response headers
-//       res.set({
-//         "Content-Type": "text/plain",
-//         "Content-Disposition": `attachment; filename="${fileName}/${fileName}"`,
-//       });
+      for (let j = 0; j < csvDataUnitsNames.length; j++) {
+        if (csvDataUnitsNames[j].id == objectId) {
+          objectName = csvDataUnitsNames[j].name.substring(0, 3);
+          csvDataLibraryRooms[i].Name = objectName; //set the name of the room
 
-//       // Send the file data in the response
-//       res.send({ fileData: fileData, fileName: fileName });
-//     }
-//   } catch (err) {
-//     next(err);
-//   }
-// });
+          const timestamp = csvDataLibraryRooms[i].CreationDate; // timestamp from CSV file
+          const dateObj = new Date(`${timestamp} GMT-0000`);
+          const options = { timeZone: "America/Los_Angeles" }; // specify timezone as options
+          const localTime = dateObj.toLocaleString("en-US", options); // convert the timestamp to local time
+          csvDataLibraryRooms[i].CreationDate = localTime;
 
-// router.get("/file", async (req, res, next) => {
-//   try {
-//     const fileNameZero = req.query.fileDataZero;
-//     const fileName = req.query.fileName;
+          const timestamp2 = csvDataLibraryRooms[i].EditDate; // timestamp from CSV file
+          const dateObj2 = new Date(`${timestamp2} GMT-0000`);
+          const options2 = { timeZone: "America/Los_Angeles" }; // specify timezone as options
+          const localTime2 = dateObj2.toLocaleString("en-US", options2); // convert the timestamp to local time
+          csvDataLibraryRooms[i].EditDate = localTime2;
+          delete csvDataLibraryRooms[i].headCount;
+        }
+      }
+    }
 
-//     let fileTypeZero;
-//     let fileNameOriginalZero;
-//     let fileNameDownloadZero;
+    resolve(csvDataLibraryRooms);
+  });
+}
 
-//     let fileType;
-//     let fileNameOriginal;
-//     let fileNameDownload;
+function parseCsvDataLibraryRooms(csvDataUnitsNames) {
+  const csvFilePath = path.join(__dirname, `../downloads/library/library.csv`);
 
-//     const data = {
-//       data: null,
-//       fileNameOriginal: fileNameOriginal,
-//       fileNameZero: fileNameDownloadZero,
-//       fileName: fileNameDownload,
-//       fileType: fileType,
-//     };
+  const file = fs.createReadStream(csvFilePath);
+  var csvDataLibraryRooms = [];
 
-//     // Check if the file exists
-//     if (!fs.existsSync(`downloads/${fileName}/${fileName}`)) {
-//       // res.status(404).send("File not found.");
-//       console.log("file not found");
-//     } else {
-//       // Read the file from the file system
-//       const fileDataZero = fs.readFileSync(
-//         `downloads/${fileNameZero}/${fileNameZero}`
-//       );
-//       const fileData = fs.readFileSync(`downloads/${fileName}/${fileName}`);
+  return new Promise((resolve) => {
+    Papa.parse(file, {
+      header: true,
+      step: function (result) {
+        csvDataLibraryRooms.push(result.data);
+      },
+      complete: function (results, file) {
+        generateFinalCsvFile(csvDataLibraryRooms, csvDataUnitsNames).then(
+          (result) => {
+            resolve(result);
+          }
+        );
+      },
+    });
+  });
+}
 
-//       // Set the response headers
+async function joinData(data) {
+  const csvFilePath = path.join(__dirname, `../downloads/units/units.csv`);
+  const file = fs.createReadStream(csvFilePath);
 
-//       // const fileTypeZero = fileNameZero.endsWith(".xlsx") ? "xlsx" : "csv";
-//       // const fileNameOriginalZero = fileNameZero.replace(/\.[^/.]+$/, "");
-//       // const fileNameDownloadZero = `${fileNameOriginalZero}`;
+  return new Promise((resolve) => {
+    var csvDataUnitsNames = [];
 
-//       // const fileType = fileName.endsWith(".xlsx") ? "xlsx" : "csv";
-//       // const fileNameOriginal = fileName.replace(/\.[^/.]+$/, "");
-//       // const fileNameDownload = `${fileNameOriginal}`;
-//       fileTypeZero = fileNameZero.endsWith(".xlsx") ? "xlsx" : "csv";
-//       fileNameOriginalZero = fileNameZero.replace(/\.[^/.]+$/, "");
-//       fileNameDownloadZero = `${fileNameOriginalZero}`;
-//       data.fileNameZero = fileNameDownloadZero;
-
-//       data.fileType = fileName.endsWith(".xlsx") ? "xlsx" : "csv";
-//       fileNameOriginal = fileName.replace(/\.[^/.]+$/, "");
-//       data.fileNameOriginal = fileNameOriginal;
-//       fileNameDownload = `${fileNameOriginal}`;
-//       data.fileName = fileNameDownload;
-
-//       res.set({
-//         "Content-Type": "application/json",
-//       });
-
-//       // Send the file data in the response
-//       // const data = {
-//       //   data: null,
-//       //   fileNameOriginal: fileNameOriginal,
-//       //   fileNameZero: fileNameDownloadZero,
-//       //   fileName: fileNameDownload,
-//       //   fileType: fileType,
-//       // };
-
-//       if (fileType === "xlsx") {
-//         // Convert XLSX file to CSV string
-//         const workbook = xlsx.read(fileData);
-//         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-//         const csvData = xlsx.utils.sheet_to_csv(sheet);
-
-//         // Convert CSV data to JSON object
-//         data.data = await csv().fromString(csvData);
-//       } else {
-//         // Convert CSV file to JSON object
-//         data.data = await csv().fromString(fileData.toString());
-//       }
-//       console.log(data);
-//       res.json(data);
-//     }
-//   } catch (err) {
-//     next(err);
-//   }
-// });
-
-// module.exports = router;
+    Papa.parse(file, {
+      header: true,
+      step: function (result) {
+        csvDataUnitsNames.push({
+          name: result.data.Name,
+          id: result.data.GlobalID,
+        });
+      },
+      complete: function (results, file) {
+        parseCsvDataLibraryRooms(csvDataUnitsNames).then((result) => {
+          resolve(result);
+        });
+      },
+    });
+  });
+}
 
 router.get("/file", async (req, res, next) => {
   try {
@@ -204,31 +169,49 @@ router.get("/file", async (req, res, next) => {
 
     const data = {
       data: null,
+      libraryData: null,
+      joinData: null,
       fileNameOriginal: fileNameOriginal ?? null,
       fileNameZero: fileNameDownloadZero ?? null,
       fileName: fileNameDownload ?? null,
       fileType: fileType ?? null,
     };
 
-    // Check if the file exists
-    // if (!fs.existsSync(`downloads/${fileName}/${fileName}`)) {
-    //   res.status(404).send("File not found.");
-    //   // console.log("file not found");
-    // } else {
-    // Read the file from the file system
+    async function getData(fileData) {
+      if (fileData) {
+        if (fileType === "xlsx") {
+          // Convert XLSX file to CSV string
+          const workbook = xlsx.read(fileData);
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const csvData = xlsx.utils.sheet_to_csv(sheet);
+
+          // Convert CSV data to JSON object
+          let data = await csv().fromString(csvData);
+          return data;
+        } else {
+          // Convert CSV file to JSON object
+          let data = await csv().fromString(fileData.toString());
+          return data;
+        }
+      }
+    }
+
+    // Check if the file exists Read the file from the file system
     const filePathZero = path.join(
       __dirname,
-      `../downloads/${fileNameZero}/${fileNameZero}`
+      `../downloads/${fileNameZero}/${fileNameZero}.csv`
     );
     if (fs.existsSync(filePathZero)) {
       fileDataZero = fs.readFileSync(
-        `downloads/${fileNameZero}/${fileNameZero}`
+        `downloads/${fileNameZero}/${fileNameZero}.csv`
       );
       // Set the response headers
       fileTypeZero = fileNameZero.endsWith(".xlsx") ? "xlsx" : "csv";
       fileNameOriginalZero = fileNameZero.replace(/\.[^/.]+$/, "");
       fileNameDownloadZero = `${fileNameOriginalZero}`;
       data.fileNameZero = fileNameDownloadZero;
+      data.libraryData = await getData(fileDataZero);
+      //set data here
     } else {
       data.fileNameZero = "No File";
       console.log("File not found:", filePathZero);
@@ -236,19 +219,18 @@ router.get("/file", async (req, res, next) => {
 
     const filePath = path.join(
       __dirname,
-      `../downloads/${fileName}/${fileName}`
+      `../downloads/${fileName}/${fileName}.csv`
     );
     if (fs.existsSync(filePath)) {
-      fileData = fs.readFileSync(`downloads/${fileName}/${fileName}`);
+      fileData = fs.readFileSync(`downloads/${fileName}/${fileName}.csv`);
 
       // Set the response headers
-
-      // data.fileType = fileName.endsWith(".xlsx") ? "xlsx" : "csv";
       data.fileType = "csv";
       fileNameOriginal = fileName.replace(/\.[^/.]+$/, "");
       data.fileNameOriginal = fileNameOriginal;
       fileNameDownload = `${fileNameOriginal}`;
       data.fileName = fileNameDownload;
+      data.data = await getData(fileData);
     } else {
       data.fileName = "No File";
       console.log("File not found:", filePath);
@@ -258,23 +240,13 @@ router.get("/file", async (req, res, next) => {
       "Content-Type": "application/json",
     });
 
-    if (fileData) {
-      if (fileType === "xlsx") {
-        // Convert XLSX file to CSV string
-        const workbook = xlsx.read(fileData);
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const csvData = xlsx.utils.sheet_to_csv(sheet);
+    await joinData().then((response) => {
+      console.log(response);
+      data.joinData = response;
+      // console.log(data);
+      res.json(data);
+    });
 
-        // Convert CSV data to JSON object
-        data.data = await csv().fromString(csvData);
-      } else {
-        // Convert CSV file to JSON object
-        data.data = await csv().fromString(fileData.toString());
-      }
-    }
-
-    console.log(data);
-    res.json(data);
     // }
   } catch (err) {
     next(err);
