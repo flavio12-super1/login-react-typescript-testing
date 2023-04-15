@@ -1,12 +1,11 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
 import "./styles/App.css";
 
 import SocketContext from "./config/SocketContext";
 import io from "socket.io-client";
 import axios from "./config/axiosConfig";
 
-// import PrivateRoute from "./components/PrivateRoute";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";

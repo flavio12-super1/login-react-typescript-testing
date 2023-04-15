@@ -3,6 +3,9 @@ import { Navigate } from "react-router-dom";
 import "../styles/App.css";
 import ChartApp from "./chartApp";
 import axios from "axios";
+// import * as xlsx from "xlsx";
+// import csv from "csvtojson";
+// import { parse } from "papaparse";
 import Layout1 from "../images/Layout1.jpg";
 import Layout2 from "../images/Layout2.jpg";
 import Layout3 from "../images/Layout3.jpg";
@@ -70,9 +73,24 @@ function Dashboard() {
     } else {
       window.location.href = "/login";
     }
+    // axios
+    //   .get("/upload/file", {
+    //     params: {
+    //       fileName: "library", // replace with the actual file name
+    //     },
+    //   })
+    //   .then((response) => {
+    //     console.log(response.data.fileData + " : " + response.data.fileName); // this will log the file data to the console
+    //     setLibraryFileName(response.data.fileName);
+    //     setGraph(response.data.fileData);
+    //   })
+    //   .catch((error) => {
+    //     console.error(error);
+    //   });
     axios
       .get("/upload/file", {
         params: { fileDataZero: "units", fileName: "library" },
+        // responseType: "blob",
       })
       .then((response) => {
         const fileNameZero = response.data.fileNameZero;
@@ -87,6 +105,21 @@ function Dashboard() {
         setGraph(fileData);
 
         console.log(fileData);
+        // if (fileType === "xlsx") {
+        //   // Process XLSX data
+        //   const workbook = xlsx.read(response.data, { type: "array" });
+
+        //   const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        //   const csvData = xlsx.utils.sheet_to_csv(sheet);
+        //   const jsonData = csv().fromString(response.data.toString());
+
+        //   console.log(jsonData);
+        // } else {
+        //   // Process CSV data
+        //   const jsonData = csv().fromString(response.data.fileData.toString());
+
+        //   console.log(jsonData);
+        // }
       })
       .catch((error) => {
         console.log(error);
@@ -115,6 +148,20 @@ function Dashboard() {
     }
   };
 
+  // useEffect(() => {
+  //   if (authorized) {
+  //     axios
+  //       .get("/chart/data")
+  //       .then((response) => {
+  //         console.log(response.data);
+  //         // setData(response.data);
+  //       })
+  //       .catch((error) => {
+  //         console.error(error);
+  //       });
+  //   }
+  // }, [authorized]);
+
   //upload xlsx or csv file
   const [selectedFile, setSelectedFile] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -138,6 +185,16 @@ function Dashboard() {
       setErrorMessage("");
     }
   };
+
+  // const setGraph = (data) => {
+  //   if (data.fileName == "units") {
+  //     console.log("units data added");
+  //   } else if (data.fileName == "library") {
+  //     console.log(data.data);
+  //     setData(data.data);
+  //     console.log("library file added");
+  //   }
+  // };
 
   const handleUpload = () => {
     if (option) {
@@ -213,6 +270,7 @@ function Dashboard() {
   };
 
   const handleDelete = (fileName) => {
+    // if (option !== "") {
     if (fileName === unitsFileName && unitsFileName !== "") {
       console.log(fileName);
       deleteFile(fileName);
@@ -222,6 +280,9 @@ function Dashboard() {
     } else {
       alert("there is nothing to delete");
     }
+    // } else {
+    //   alert("there is nothing to delete");
+    // }
   };
 
   //check user auth
@@ -369,6 +430,9 @@ function Dashboard() {
             </div>
             <input type="file" onChange={handleFileInput} />
             {errorMessage && <p>{errorMessage}</p>}
+            {/* <button onClick={handleUpload} disabled={!selectedFile}>
+              Upload
+            </button> */}
             <button onClick={handleUpload} disabled={checkIfDisabled()}>
               Upload
             </button>
@@ -427,12 +491,31 @@ function Dashboard() {
               rder the data
             </div>
           ) : (
+            // <div>
+            //   <div className="graphPicker">
+            //     <div>
+            //       <div className="mapElelement">
+            //         <FloorPicker />
+            //       </div>
+
+            //       {/* {MyComponent()} */}
+            //       {getImage()}
+            //     </div>
+
+            //     <div className="popup">
+            //       {popUp !== "" ? popUp : <div>no popup has been selected</div>}
+            //     </div>
+            //   </div>
+            //   <div style={{ width: "700px" }}>{renderChart()}</div>
+            // </div>
             <div>
               <div className="graphPicker">
                 <div>
                   <div className="mapElelement">
                     <FloorPicker />
                   </div>
+
+                  {/* {MyComponent()} */}
                   {getImage()}
                 </div>
 
@@ -442,6 +525,19 @@ function Dashboard() {
               </div>
               <div style={{ width: "700px" }}>{renderChart()}</div>
             </div>
+            // <div
+            //   style={{
+            //     height: "150px",
+            //     display: "flex",
+            //     justifyContent: "center",
+            //     alignItems: "center",
+            //     padding: "100px",
+            //     paddingTop: "10px",
+            //   }}
+            // >
+            //   Upload both a units and library csv or xlsx file to be able to
+            //   rder the data
+            // </div>
           )}
         </div>
       </div>
