@@ -38,26 +38,42 @@ interface MyData {
   GlobalID: string;
   GUID: string;
   Name: string;
+  Level: string;
   Count: string;
   CreationDate: string;
   Creator: string;
   EditDate: string;
   Editor: string;
 }
+interface MySettings {
+  Type: string;
+  Level: string;
+}
 
 function eachFloor(myCount: string) {
   return parseInt(myCount);
 }
 
-function groupDataByDay(data: MyData[]) {
+// let x = "all";
+// const settings = x;
+
+function groupDataByDay(data: MyData[], settings: MySettings) {
   const groups: { [key: string]: number } = {};
 
   data.forEach((datum) => {
     const date = new Date(datum.CreationDate);
     const day = date.toDateString();
     // const count = parseInt(datum.Count);
-    console.log(datum.Name);
-    const count = eachFloor(datum.Count);
+    console.log(datum.Level);
+    //if option == all floors
+    let count = 0;
+    if (settings.Type == "all") {
+      count = eachFloor(datum.Count);
+    } else if (settings.Type == "floor") {
+      if (datum.Level == settings.Level) {
+        count = eachFloor(datum.Count);
+      }
+    }
 
     if (!groups[day]) {
       groups[day] = 0;
@@ -74,6 +90,7 @@ function groupDataByDay(data: MyData[]) {
 
 interface MyChartProps {
   data: MyData[];
+  settings: MySettings;
 }
 
 function handleDownload() {
@@ -86,8 +103,8 @@ function handleDownload() {
   });
 }
 
-export function MyChart({ data }: MyChartProps) {
-  const { labels, counts } = groupDataByDay(data);
+export function MyChart({ data, settings }: MyChartProps) {
+  const { labels, counts } = groupDataByDay(data, settings);
 
   const chartData = {
     labels,

@@ -6,23 +6,29 @@ interface MyData {
   GlobalID: string;
   GUID: string;
   Name: string;
+  Level: string;
   Count: string;
   CreationDate: string;
   Creator: string;
   EditDate: string;
   Editor: string;
 }
+interface MySettings {
+  Type: string;
+  Level: string;
+}
 
 interface MyProps {
   data: MyData[];
+  settings: MySettings;
 }
 
 function chartApp(props: MyProps) {
-  const { data } = props;
+  const { data, settings } = props;
 
   return (
     <div>
-      <MyChart data={data} />
+      <MyChart data={data} settings={settings} />
     </div>
   );
 }

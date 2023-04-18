@@ -96,6 +96,10 @@ function generateFinalCsvFile(csvDataLibraryRooms, csvDataUnitsNames) {
           const options2 = { timeZone: "America/Los_Angeles" }; // specify timezone as options
           const localTime2 = dateObj2.toLocaleString("en-US", options2); // convert the timestamp to local time
           csvDataLibraryRooms[i].EditDate = localTime2;
+          csvDataLibraryRooms[i].Level = csvDataUnitsNames[j].level.substring(
+            csvDataUnitsNames[j].level.length - 2
+          );
+
           delete csvDataLibraryRooms[i].headCount;
         }
       }
@@ -139,8 +143,9 @@ async function joinData(data) {
       header: true,
       step: function (result) {
         csvDataUnitsNames.push({
-          name: result.data.Name,
-          id: result.data.GlobalID,
+          name: result.data["Name"],
+          id: result.data["GlobalID"],
+          level: result.data["Level ID"],
         });
       },
       complete: function (results, file) {

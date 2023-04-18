@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import "../styles/App.css";
 import ChartApp from "./chartApp";
@@ -8,8 +8,14 @@ import Layout2 from "../images/Layout2.jpg";
 import Layout3 from "../images/Layout3.jpg";
 import Layout4 from "../images/Layout4.jpg";
 
-import FloorPicker from "./FloorPicker";
-import FloorContext from "./FloorContext";
+import FloorPicker from "./optionPicker/floorPicker/FloorPicker";
+import FloorContext from "./optionPicker/floorPicker/FloorContext";
+
+import FloorPickerChart from "./optionPicker/floorPickerChart/FloorPickerChart";
+import FloorContextChart from "./optionPicker/floorPickerChart/FloorContextChart";
+
+import RoomPicker from "./optionPicker/roomPicker/RoomPicker";
+import RoomContext from "./optionPicker/roomPicker/RoomContext";
 
 const classNames = require("classnames");
 classNames("foo", "bar"); // => 'foo bar'
@@ -26,11 +32,31 @@ function Dashboard() {
   const [selectedFloor, setSelectedFloor] = useState(1);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const [selectedFloorChart, setSelectedFloorChart] = useState(null);
+  const [isExpandedChart, setIsExpandedChart] = useState(false);
+
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [isExpandedRoom, setIsExpandedRoom] = useState(false);
+
   const floorState = {
     selectedFloor,
     setSelectedFloor,
     isExpanded,
     setIsExpanded,
+  };
+
+  const floorStateChart = {
+    selectedFloorChart,
+    setSelectedFloorChart,
+    isExpandedChart,
+    setIsExpandedChart,
+  };
+
+  const roomState = {
+    selectedRoom,
+    setSelectedRoom,
+    isExpandedRoom,
+    setIsExpandedRoom,
   };
 
   const setGraph = (data) => {
@@ -174,26 +200,55 @@ function Dashboard() {
           //   };
           //   reader.readAsText(selectedFile);
           // }
-          axios
-            .get("/upload/file", {
-              params: { fileDataZero: "units", fileName: "library" },
-            })
-            .then((response) => {
-              const fileNameZero = response.data.fileNameZero;
-              const fileName = response.data.fileName;
+          if (res.data.fileName === "units") {
+            setUnitsFileName(res.data.fileName);
+          } else if (res.data.fileName === "library") {
+            setLibraryFileName(res.data.fileName);
+            axios
+              .get("/upload/file", {
+                params: {
+                  fileDataZero: "units",
+                  fileName: "library",
+                },
+              })
+              .then((response) => {
+                const fileNameZero = response.data.fileNameZero;
+                const fileName = response.data.fileName;
 
-              const fileData = response.data;
-              setUnitsFileName(fileNameZero);
-              setLibraryFileName(fileName);
-              console.log("data state has been updated");
+                const fileData = response.data;
+                setUnitsFileName(fileNameZero);
+                setLibraryFileName(fileName);
+                console.log("data state has been updated");
 
-              setGraph(fileData);
+                setGraph(fileData);
 
-              // console.log(fileData);
-            })
-            .catch((error) => {
-              console.log(error);
-            });
+                // console.log(fileData);
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          }
+
+          //   axios
+          //     .get("/upload/file", {
+          //       params: { fileDataZero: "units", fileName: "library" },
+          //     })
+          //     .then((response) => {
+          //       const fileNameZero = response.data.fileNameZero;
+          //       const fileName = response.data.fileName;
+
+          //       const fileData = response.data;
+          //       setUnitsFileName(fileNameZero);
+          //       setLibraryFileName(fileName);
+          //       console.log("data state has been updated");
+
+          //       setGraph(fileData);
+
+          //       // console.log(fileData);
+          //     })
+          //     .catch((error) => {
+          //       console.log(error);
+          //     });
         })
         .catch((err) => {
           console.error(err);
@@ -349,8 +404,6 @@ function Dashboard() {
     let totalCount = 0;
     let earliestCreationDate = null;
     let latestEditDate = null;
-    let creator = null;
-    let editor = null;
 
     filteredObjects.forEach((obj) => {
       totalCount += parseInt(obj.Count);
@@ -400,8 +453,13 @@ function Dashboard() {
     );
   }
 
+  const settings = {
+    Type: "floor",
+    Level: selectedFloorChart,
+  };
+
   function renderChart() {
-    return <ChartApp data={data} />;
+    return <ChartApp data={data} settings={settings} />;
   }
 
   const layoutList = [Layout1, Layout2, Layout3, Layout4];
@@ -422,123 +480,167 @@ function Dashboard() {
   function checkIfDisabled() {
     if (unitsFileName !== "No File" && selectedFile) {
       return false;
-    } else if (option == "units" && libraryFileName == "No File") {
+    } else if (option === "units" && libraryFileName === "No File") {
       return false;
     } else {
       return true;
     }
+    // return false;
+  }
+
+  function handleOption() {
+    setSelectedFloorChart(0);
+    setIsExpandedChart(false);
+    setSelectedRoom(null);
+    setIsExpandedRoom(false);
+
+    // setSelectedRoom(null);
   }
 
   return (
-    <FloorContext.Provider value={floorState}>
-      <div className="App">
-        <div className="leftSide">
-          <div>username: {username}</div>
-          <div>
-            <button onClick={checkAuth}>check auth</button>
-          </div>
-          {/* upload xlsx*/}
-          <div>
-            <h1>Upload XLSX or CSV File</h1>
-            <div>
-              <button
-                className={`btn ${getClassname("units")}`}
-                id="units"
-                onClick={(e) => setOption(e.target.id)}
-              >
-                units
-              </button>
-              <button
-                className={`btn ${getClassname("library")}`}
-                id="library"
-                onClick={(e) => setOption(e.target.id)}
-              >
-                library
-              </button>
-            </div>
-            <input type="file" onChange={handleFileInput} />
-            {errorMessage && <p>{errorMessage}</p>}
-            <button onClick={handleUpload} disabled={checkIfDisabled()}>
-              Upload
-            </button>
-            <div
-              style={{
-                border: "solid",
-                width: "-webkit-fill-available",
-              }}
-            >
-              <div
-                style={{ display: "flex", borderBottom: "solid black" }}
-                className={option === "units" ? "fileOptionDiv" : {}}
-              >
-                <div className="tableBorder hasRightBorder">units</div>
-                <div className="tableNonBorder hasRightBorder">
-                  {unitsFileName}
-                </div>
-                <div className="tableBorder">
-                  <button onClick={() => handleDelete("units")}>delete</button>
-                </div>
-              </div>
-              <div
-                style={{ display: "flex" }}
-                className={option === "library" ? "fileOptionDiv" : {}}
-              >
-                <div className="tableBorder hasRightBorder">library</div>
-                <div className="tableNonBorder hasRightBorder">
-                  {libraryFileName}
-                </div>
-                <div className="tableBorder">
-                  <button onClick={() => handleDelete("library")}>
-                    delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <button onClick={handleLogout}>log out</button>
+    // <FloorContext.Provider value={floorState}>
+    <div className="App">
+      <div className="leftSide">
+        <div>username: {username}</div>
+        <div>
+          <button onClick={checkAuth}>check auth</button>
         </div>
-        {/* render chart data*/}
-        <div className="rightSide">
-          {data !== "" &&
-          (unitsFileName == "No File" || libraryFileName == "No File") ? (
-            // <Image/>
-            <div
-              style={{
-                height: "150px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: "100px",
-                paddingTop: "10px",
-              }}
+        {/* upload xlsx*/}
+        <div>
+          <h1>Upload XLSX or CSV File</h1>
+          <div>
+            <button
+              className={`btn ${getClassname("units")}`}
+              id="units"
+              onClick={(e) => setOption(e.target.id)}
             >
-              Upload both a units and library csv or xlsx file to be able to
-              rder the data
+              units
+            </button>
+            <button
+              className={`btn ${getClassname("library")}`}
+              id="library"
+              onClick={(e) => setOption(e.target.id)}
+            >
+              library
+            </button>
+          </div>
+          <input type="file" onChange={handleFileInput} />
+          {errorMessage && <p>{errorMessage}</p>}
+          <button onClick={handleUpload} disabled={checkIfDisabled()}>
+            Upload
+          </button>
+          <div
+            style={{
+              border: "solid",
+              width: "-webkit-fill-available",
+            }}
+          >
+            <div
+              style={{ display: "flex", borderBottom: "solid black" }}
+              className={option === "units" ? "fileOptionDiv" : {}}
+            >
+              <div className="tableBorder hasRightBorder">units</div>
+              <div className="tableNonBorder hasRightBorder">
+                {unitsFileName}
+              </div>
+              <div className="tableBorder">
+                <button onClick={() => handleDelete("units")}>delete</button>
+              </div>
             </div>
-          ) : (
-            <div>
-              <div className="graphPicker">
+            <div
+              style={{ display: "flex" }}
+              className={option === "library" ? "fileOptionDiv" : {}}
+            >
+              <div className="tableBorder hasRightBorder">library</div>
+              <div className="tableNonBorder hasRightBorder">
+                {libraryFileName}
+              </div>
+              <div className="tableBorder">
+                <button onClick={() => handleDelete("library")}>delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button onClick={handleLogout}>log out</button>
+      </div>
+      {/* render chart data*/}
+      <div className="rightSide">
+        {data !== "" &&
+        (unitsFileName === "No File" || libraryFileName === "No File") ? (
+          // <Image/>
+          <div
+            style={{
+              height: "150px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "100px",
+              paddingTop: "10px",
+            }}
+          >
+            Upload both a units and library csv or xlsx file to be able to rder
+            the data
+          </div>
+        ) : (
+          <div>
+            <div className="graphPicker">
+              <FloorContext.Provider value={floorState}>
                 <div>
                   <div className="mapElelement">
                     <FloorPicker />
                   </div>
                   {getImage()}
                 </div>
+              </FloorContext.Provider>
 
-                <div className="popup">
-                  {popUp !== "" ? (
-                    <PopUp />
-                  ) : (
-                    <div>no popup has been selected</div>
-                  )}
+              <div className="popup">
+                {popUp !== "" ? (
+                  <PopUp />
+                ) : (
+                  <div>no popup has been selected</div>
+                )}
+              </div>
+            </div>
+            <div style={{ width: "700px" }}>
+              <div>
+                <button onClick={handleOption}>All Floors</button>
+                <FloorContextChart.Provider value={floorStateChart}>
+                  <FloorPickerChart />
+                </FloorContextChart.Provider>
+
+                <RoomContext.Provider value={roomState}>
+                  <RoomPicker />
+                </RoomContext.Provider>
+              </div>
+              <div>{renderChart()}</div>
+              <div>
+                <div className="timeFrameDiv">
+                  <div className="timeFrameInnerDivs">
+                    <div>from:</div>
+                    <input type="text" />
+                  </div>
+                  <div className="timeFrameInnerDivs">
+                    <div>to:</div>
+                    <input type="text" />
+                  </div>
+                </div>
+                <div>
+                  <button>day</button>
+                  <button>week</button>
+                  <button>month</button>
+                  <button>year</button>
                 </div>
               </div>
-              <div style={{ width: "700px" }}>{renderChart()}</div>
+              <div className="graphOption">
+                <div>Select graph option</div>
+                <div>click to select</div>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    </FloorContext.Provider>
+    </div>
+    // </FloorContext.Provider>
   );
 }
 
