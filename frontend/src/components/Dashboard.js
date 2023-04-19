@@ -17,6 +17,9 @@ import FloorContextChart from "./optionPicker/floorPickerChart/FloorContextChart
 import RoomPicker from "./optionPicker/roomPicker/RoomPicker";
 import RoomContext from "./optionPicker/roomPicker/RoomContext";
 
+import DateRangePicker from "./optionPicker/datePicker/DateRangePicker";
+import DateRangeContext from "./optionPicker/datePicker/DateRangeContext";
+
 const classNames = require("classnames");
 classNames("foo", "bar"); // => 'foo bar'
 
@@ -38,6 +41,20 @@ function Dashboard() {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [isExpandedRoom, setIsExpandedRoom] = useState(false);
 
+  const [graphSettings, setGraphSettings] = useState({
+    Type: null,
+    Level: null,
+    Name: null,
+  });
+
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+
+  const handleSettings = (data) => {
+    console.log(data);
+    setGraphSettings(data);
+  };
+
   const floorState = {
     selectedFloor,
     setSelectedFloor,
@@ -50,6 +67,7 @@ function Dashboard() {
     setSelectedFloorChart,
     isExpandedChart,
     setIsExpandedChart,
+    handleSettings,
   };
 
   const roomState = {
@@ -57,6 +75,14 @@ function Dashboard() {
     setSelectedRoom,
     isExpandedRoom,
     setIsExpandedRoom,
+    handleSettings,
+  };
+
+  const datePicker = {
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
   };
 
   const setGraph = (data) => {
@@ -453,11 +479,14 @@ function Dashboard() {
     );
   }
 
+  // const settings = graphSettings;
   const settings = {
-    Type: "floor",
-    Level: selectedFloorChart,
+    Type: graphSettings.Type,
+    Level: graphSettings.Level,
+    Name: graphSettings.Name,
+    Start: startDate,
+    End: endDate,
   };
-
   function renderChart() {
     return <ChartApp data={data} settings={settings} />;
   }
@@ -489,6 +518,7 @@ function Dashboard() {
   }
 
   function handleOption() {
+    setGraphSettings({ Type: "all", Level: null, Name: null });
     setSelectedFloorChart(0);
     setIsExpandedChart(false);
     setSelectedRoom(null);
@@ -603,7 +633,9 @@ function Dashboard() {
             </div>
             <div style={{ width: "700px" }}>
               <div>
-                <button onClick={handleOption}>All Floors</button>
+                <button onClick={() => handleOption("Floors")}>
+                  All Floors
+                </button>
                 <FloorContextChart.Provider value={floorStateChart}>
                   <FloorPickerChart />
                 </FloorContextChart.Provider>
@@ -611,19 +643,17 @@ function Dashboard() {
                 <RoomContext.Provider value={roomState}>
                   <RoomPicker />
                 </RoomContext.Provider>
+                <DateRangeContext.Provider value={datePicker}>
+                  <DateRangePicker />
+                </DateRangeContext.Provider>
+                {/* <div>
+                  {startDate && startDate.toLocaleString()} :{" "}
+                  {endDate && endDate.toLocaleString()}
+                </div> */}
               </div>
+
               <div>{renderChart()}</div>
               <div>
-                <div className="timeFrameDiv">
-                  <div className="timeFrameInnerDivs">
-                    <div>from:</div>
-                    <input type="text" />
-                  </div>
-                  <div className="timeFrameInnerDivs">
-                    <div>to:</div>
-                    <input type="text" />
-                  </div>
-                </div>
                 <div>
                   <button>day</button>
                   <button>week</button>

@@ -9,6 +9,15 @@ function FloorPickerChart() {
     floorStateChart.setIsExpandedChart(false);
   };
 
+  const handleButtonClick = (floor) => {
+    handleFloorSelect(floor);
+    floorStateChart.handleSettings({
+      Type: "floor",
+      Level: floor,
+      Name: null,
+    });
+  };
+
   return (
     <div>
       <button
@@ -23,7 +32,7 @@ function FloorPickerChart() {
           {["L1", "L2", "L3", "L4"].map((floor) => (
             <button
               key={floor}
-              onClick={() => handleFloorSelect(floor)}
+              onClick={() => handleButtonClick(floor)}
               disabled={floor === floorStateChart.selectedFloorChart}
             >
               {floor}

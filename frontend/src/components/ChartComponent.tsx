@@ -48,29 +48,86 @@ interface MyData {
 interface MySettings {
   Type: string;
   Level: string;
+  Name: string;
+  Start: Date;
+  End: Date;
 }
 
 function eachFloor(myCount: string) {
   return parseInt(myCount);
 }
 
-// let x = "all";
-// const settings = x;
+// function groupDataByDay(data: MyData[], settings: MySettings) {
+//   const groups: { [key: string]: number } = {};
 
+//   const filteredData = data.filter((datum) => {
+//     const date = new Date(datum.CreationDate);
+//     const dateString = date.toLocaleDateString();
+//     const startDateString = settings.Start?.toLocaleDateString();
+//     const endDateString = settings.End?.toLocaleDateString();
+//     return (
+//       (!settings.Start || dateString >= startDateString) &&
+//       (!settings.End || dateString <= endDateString)
+//     );
+//   });
+
+//   filteredData.forEach((datum) => {
+//     const date = new Date(datum.CreationDate);
+//     const day = date.toDateString();
+//     console.log(datum.Level);
+//     let count = 0;
+//     if (settings.Type == "all") {
+//       count = eachFloor(datum.Count);
+//     } else if (settings.Type == "floor") {
+//       if (datum.Level == settings.Level) {
+//         count = eachFloor(datum.Count);
+//       }
+//     } else if (settings.Type == "room") {
+//       if (datum.Name == settings.Name) {
+//         count = eachFloor(datum.Count);
+//       }
+//     }
+
+//     if (!groups[day]) {
+//       groups[day] = 0;
+//     }
+
+//     groups[day] += count;
+//   });
+
+//   const labels = Object.keys(groups);
+//   const counts = Object.values(groups);
+
+//   return { labels, counts };
+// }
 function groupDataByDay(data: MyData[], settings: MySettings) {
   const groups: { [key: string]: number } = {};
 
-  data.forEach((datum) => {
+  const start = settings.Start?.getTime() || 0;
+  const end = settings.End?.getTime() || new Date().getTime();
+  const oneDay = 24 * 60 * 60 * 1000; // one day in milliseconds
+  const days = [];
+  for (let time = start; time <= end; time += oneDay) {
+    days.push(new Date(time).toDateString());
+  }
+
+  const filteredData = data.filter((datum) => {
+    const date = new Date(datum.CreationDate);
+    return date.getTime() >= start && date.getTime() <= end;
+  });
+
+  filteredData.forEach((datum) => {
     const date = new Date(datum.CreationDate);
     const day = date.toDateString();
-    // const count = parseInt(datum.Count);
-    console.log(datum.Level);
-    //if option == all floors
     let count = 0;
     if (settings.Type == "all") {
       count = eachFloor(datum.Count);
     } else if (settings.Type == "floor") {
       if (datum.Level == settings.Level) {
+        count = eachFloor(datum.Count);
+      }
+    } else if (settings.Type == "room") {
+      if (datum.Name == settings.Name) {
         count = eachFloor(datum.Count);
       }
     }
@@ -82,8 +139,8 @@ function groupDataByDay(data: MyData[], settings: MySettings) {
     groups[day] += count;
   });
 
-  const labels = Object.keys(groups);
-  const counts = Object.values(groups);
+  const labels = days;
+  const counts = days.map((day) => groups[day] || 0);
 
   return { labels, counts };
 }

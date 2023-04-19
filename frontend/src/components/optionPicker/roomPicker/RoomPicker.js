@@ -9,6 +9,11 @@ function RoomPicker() {
     RoomState.setIsExpandedRoom(false);
   };
 
+  const handleButtonClick = (room) => {
+    handleRoomSelect(room);
+    RoomState.handleSettings({ Type: "room", Name: room });
+  };
+
   return (
     <div>
       <button
@@ -48,7 +53,7 @@ function RoomPicker() {
           ].map((Room) => (
             <button
               key={Room}
-              onClick={() => handleRoomSelect(Room)}
+              onClick={() => handleButtonClick(Room)}
               disabled={Room === RoomState.selectedRoom}
             >
               {Room}

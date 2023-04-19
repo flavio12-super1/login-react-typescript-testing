@@ -16,6 +16,9 @@ interface MyData {
 interface MySettings {
   Type: string;
   Level: string;
+  Name: string;
+  Start: Date;
+  End: Date;
 }
 
 interface MyProps {
