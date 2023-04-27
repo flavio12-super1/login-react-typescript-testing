@@ -298,7 +298,7 @@ function Profile() {
 
   return (
     <div>
-      {user != null ? <ProfilePage /> : <div>This user does not exist.</div>}
+      {user != null ? <ProfilePage /> : <div>This user does not exist</div>}
     </div>
   );
 }

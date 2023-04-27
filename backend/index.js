@@ -266,6 +266,23 @@ app.get("/getUser", verifyJWT, async (req, res) => {
   }
 });
 
+app.post("/mySearch", verifyJWT, async (req, res) => {
+  const { search } = req.body;
+  console.log(search);
+  const existingUsers = await User.find({
+    email: { $regex: new RegExp(search, "i") },
+  });
+  if (existingUsers.length > 0) {
+    console.log(
+      "users found: " + existingUsers.map((user) => user.email).join(", ")
+    );
+    res.status(200).json({ message: "success", users: existingUsers });
+  } else {
+    console.log("users not found");
+    res.status(404).json({ message: "error" });
+  }
+});
+
 // Routes
 const testRoutes = require("./routes/test");
 app.use("/test", verifyJWT, testRoutes);

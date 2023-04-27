@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "./Lurker";
 import spider from "./lurker-icons/spider.png";
+import explore from "./lurker-icons/explore.png";
 import bell from "./lurker-icons/bell.png";
 import profile from "./lurker-icons/profile.png";
 import "../styles/Nav.css";
@@ -17,6 +18,13 @@ function Nav() {
           <Link to="/lurker/" className="navStyle">
             <div className="divImg">
               <img className="navIcons" src={spider} alt="spider" />
+            </div>
+          </Link>
+        </div>
+        <div>
+          <Link to="/lurker/explore" className="navStyle">
+            <div className="divImg">
+              <img className="navIcons" src={explore} alt="explore" />
             </div>
           </Link>
         </div>

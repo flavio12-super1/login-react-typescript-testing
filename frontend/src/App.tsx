@@ -14,6 +14,7 @@ import Lurker from "./components/Lurker";
 import Chat from "./components/Chat";
 import Notifications from "./components/Notifications";
 import Profile from "./components/Profile";
+import Explore from "./components/navComponents/Explore";
 
 const socket = io({
   auth: {
@@ -57,6 +58,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/Lurker" element={<Lurker />} />
+          <Route
+            path="/lurker/explore"
+            element={<Lurker page={<Explore />} />}
+          />
           <Route path="/lurker/" element={<Lurker page={<Chat />} />} />
           <Route
             path="/lurker/notifications"

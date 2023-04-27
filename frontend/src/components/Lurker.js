@@ -18,6 +18,7 @@ function Lurker(props) {
   useEffect(() => {
     const handleMessageReceived = (data) => {
       alert(data.senderEmail + " says: " + data.message);
+      console.log(data);
       setNotifications((notification) => [data, ...notification]);
       SetCount((prevCount) => prevCount + 1);
       console.log(data);

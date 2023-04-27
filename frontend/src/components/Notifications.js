@@ -1,9 +1,7 @@
 import React, { useContext } from "react";
-import { useNavigate } from "react-router-dom";
 import { UserContext } from "./Lurker";
 
 function Notifications() {
-  let navigate = useNavigate();
   const userData = useContext(UserContext);
   const { notifications } = userData;
 
@@ -18,16 +16,9 @@ function Notifications() {
     ));
   };
 
-  function handleClick() {
-    navigate("/lurker");
-  }
-
   return (
     <div>
       <div>Notifications</div>
-      <div>
-        <button onClick={handleClick}>lurker</button>
-      </div>
       <div>{renderNotifications()}</div>
     </div>
   );
