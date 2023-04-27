@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import "../styles/App.css";
 import ChartApp from "./chartApp";
-import axios from "axios";
+// import axios from "axios";
+import axiosInstance from "../config/axiosConfig";
 import Layout1 from "../images/Layout1.jpg";
 import Layout2 from "../images/Layout2.jpg";
 import Layout3 from "../images/Layout3.jpg";
@@ -47,7 +48,7 @@ function Dashboard() {
     Name: null,
   });
 
-  const [startDate, setStartDate] = useState(null);
+  const [startDate, setStartDate] = useState(new Date(2023, 3, 13));
   const [endDate, setEndDate] = useState(null);
 
   const handleSettings = (data) => {
@@ -97,14 +98,14 @@ function Dashboard() {
   };
 
   useEffect(() => {
+    console.log("initializing .................... ");
     if (localStorage.getItem("token")) {
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${localStorage.getItem("token")}`;
-      axios
+      console.log("token found .................... ");
+      axiosInstance
         .get("/verify")
         .then((response) => {
           if (response.data.message === "success") {
+            console.log("verified .................... ");
             setAuthorized(true);
           } else {
             <Navigate to="/login" />;
@@ -114,19 +115,21 @@ function Dashboard() {
           console.log(error);
         });
       //get login info
-      axios.get("/loginStatus").then((response) => {
+      axiosInstance.get("/loginStatus").then((response) => {
         if (response.data.loggedIn) {
+          console.log("getting login status .................... ");
           setUsername(response.data.user.email);
         }
       });
     } else {
       window.location.href = "/login";
     }
-    axios
+    axiosInstance
       .get("/upload/file", {
         params: { fileDataZero: "units", fileName: "library" },
       })
       .then((response) => {
+        console.log("getting files .................... ");
         const fileNameZero = response.data.fileNameZero;
         const fileName = response.data.fileName;
 
@@ -135,7 +138,10 @@ function Dashboard() {
         setLibraryFileName(fileName);
         console.log("data state has been updated");
 
-        setGraph(fileData);
+        if (fileNameZero != "No File" && fileName != "No File") {
+          console.log("graphing data ......................... ");
+          setGraph(fileData);
+        }
 
         // console.log(fileData);
       })
@@ -152,7 +158,7 @@ function Dashboard() {
     event.preventDefault();
 
     try {
-      axios
+      axiosInstance
         .get("http://localhost:8000/logout")
         .then((res) => {
           localStorage.removeItem("token");
@@ -195,7 +201,7 @@ function Dashboard() {
       const formData = new FormData();
       formData.append("file", selectedFile);
       console.log(option);
-      axios
+      axiosInstance
         .post("/upload/file", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -205,32 +211,14 @@ function Dashboard() {
           },
         })
         .then((res) => {
-          // console.log(res.data.data);
-          // const fileExtension = selectedFile.name.split(".").pop();
-          // if (fileExtension === "xlsx") {
-          //   setGraph(res.data);
-          //   if (option === "units") {
-          //     setUnitsFileName(res.data.fileName);
-          //   } else if (option === "library") {
-          //     setLibraryFileName(res.data.fileName);
-          //   }
-          // } else if (fileExtension === "csv") {
-          //   const reader = new FileReader();
-          //   reader.onload = () => {
-          //     setGraph(res.data);
-          //     if (option === "units") {
-          //       setUnitsFileName(res.data.fileName);
-          //     } else if (option === "library") {
-          //       setLibraryFileName(res.data.fileName);
-          //     }
-          //   };
-          //   reader.readAsText(selectedFile);
-          // }
           if (res.data.fileName === "units") {
+            // if (libraryFileName === "library") {
+            //   console.log("hope it doesnt crash");
+            // } else {
+            //   setUnitsFileName(res.data.fileName);
+            // }
             setUnitsFileName(res.data.fileName);
-          } else if (res.data.fileName === "library") {
-            setLibraryFileName(res.data.fileName);
-            axios
+            axiosInstance
               .get("/upload/file", {
                 params: {
                   fileDataZero: "units",
@@ -246,7 +234,40 @@ function Dashboard() {
                 setLibraryFileName(fileName);
                 console.log("data state has been updated");
 
-                setGraph(fileData);
+                // setGraph(fileData);
+                if (fileNameZero != "No File" && fileName != "No File") {
+                  console.log("graphing data ......................... ");
+                  setGraph(fileData);
+                }
+
+                // console.log(fileData);
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          } else if (res.data.fileName === "library") {
+            setLibraryFileName(res.data.fileName);
+            axiosInstance
+              .get("/upload/file", {
+                params: {
+                  fileDataZero: "units",
+                  fileName: "library",
+                },
+              })
+              .then((response) => {
+                const fileNameZero = response.data.fileNameZero;
+                const fileName = response.data.fileName;
+
+                const fileData = response.data;
+                setUnitsFileName(fileNameZero);
+                setLibraryFileName(fileName);
+                console.log("data state has been updated");
+
+                // setGraph(fileData);
+                if (fileNameZero != "No File" && fileName != "No File") {
+                  console.log("graphing data ......................... ");
+                  setGraph(fileData);
+                }
 
                 // console.log(fileData);
               })
@@ -254,27 +275,6 @@ function Dashboard() {
                 console.log(error);
               });
           }
-
-          //   axios
-          //     .get("/upload/file", {
-          //       params: { fileDataZero: "units", fileName: "library" },
-          //     })
-          //     .then((response) => {
-          //       const fileNameZero = response.data.fileNameZero;
-          //       const fileName = response.data.fileName;
-
-          //       const fileData = response.data;
-          //       setUnitsFileName(fileNameZero);
-          //       setLibraryFileName(fileName);
-          //       console.log("data state has been updated");
-
-          //       setGraph(fileData);
-
-          //       // console.log(fileData);
-          //     })
-          //     .catch((error) => {
-          //       console.log(error);
-          //     });
         })
         .catch((err) => {
           console.error(err);
@@ -285,7 +285,7 @@ function Dashboard() {
   };
 
   const deleteFile = (fileName) => {
-    axios
+    axiosInstance
       .post("/delete/file", {
         data: {
           fileName: fileName,
@@ -324,7 +324,7 @@ function Dashboard() {
 
   //check user auth
   const checkAuth = () => {
-    axios
+    axiosInstance
       .get("http://localhost:8000/isUserAuth")
       .then((response) => {
         alert(response.data.message);
@@ -443,6 +443,13 @@ function Dashboard() {
       }
     });
 
+    const divRef = useRef(null);
+
+    function handleButtonClick() {
+      const textToCopy = divRef.current.innerText;
+      navigator.clipboard.writeText(textToCopy);
+    }
+
     return (
       <div>
         <p>{popUp}</p>
@@ -458,6 +465,8 @@ function Dashboard() {
           Creator: {filteredObjects.length > 0 && filteredObjects[0].Creator}
         </p>
         <p>Editor: {filteredObjects.length > 0 && filteredObjects[0].Editor}</p>
+        <p ref={divRef}>{filteredObjects[0].GUID}</p>
+        <button onClick={handleButtonClick}>Copy Text</button>
       </div>
     );
   };
@@ -507,13 +516,23 @@ function Dashboard() {
   };
 
   function checkIfDisabled() {
-    if (unitsFileName !== "No File" && selectedFile) {
-      return false;
-    } else if (option === "units" && libraryFileName === "No File") {
-      return false;
-    } else {
+    if (!selectedFile) {
+      return true;
+    } else if (
+      selectedFile &&
+      option == "library" &&
+      unitsFileName == "No File"
+    ) {
       return true;
     }
+    return false;
+    // if (unitsFileName !== "No File" && selectedFile) {
+    //   return false;
+    // } else if (option === "units" && libraryFileName === "No File") {
+    //   return false;
+    // } else {
+    //   return true;
+    // }
     // return false;
   }
 

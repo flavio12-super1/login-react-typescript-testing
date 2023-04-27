@@ -13,8 +13,11 @@ const Login = () => {
         email,
         password,
       });
-      const { token } = await response.data;
+      const { token, user } = await response.data;
+      console.log(user);
       localStorage.setItem("token", token);
+      localStorage.setItem("email", user.email);
+      localStorage.setItem("userID", user._id);
       window.location.href = "http://localhost:8000/dashboard";
     } catch (error) {
       if (error.response) {

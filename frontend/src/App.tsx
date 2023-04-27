@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import "./styles/App.css";
 
@@ -10,11 +10,20 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
 import Home from "./components/Home";
+import Lurker from "./components/Lurker";
+import Chat from "./components/Chat";
+import Notifications from "./components/Notifications";
+import Profile from "./components/Profile";
 
-const socket = io();
+const socket = io({
+  auth: {
+    token: localStorage.getItem("token"),
+  },
+});
 
 function App() {
   axios.defaults.baseURL = "http://localhost:8000";
+  console.log("reloaded app.tsx");
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -32,21 +41,31 @@ function App() {
     };
   }, []);
 
+  //   style={{
+  //   display: "flex",
+  //   justifyContent: "center",
+  //   backgroundColor: "#d4d2d0",
+  //   height: "100vh",
+  // }}
+
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        backgroundColor: "#d4d2d0",
-        height: "100vh",
-      }}
-    >
+    <div className="appContainer">
       <SocketContext.Provider value={{ socket }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/Lurker" element={<Lurker />} />
+          <Route path="/lurker/" element={<Lurker page={<Chat />} />} />
+          <Route
+            path="/lurker/notifications"
+            element={<Lurker page={<Notifications />} />}
+          />
+          <Route
+            path="/lurker/:username"
+            element={<Lurker page={<Profile />} />}
+          />
         </Routes>
       </SocketContext.Provider>
     </div>
@@ -54,10 +73,3 @@ function App() {
 }
 
 export default App;
-
-// if (localStorage.getItem("token"))
-// console.log(localStorage.getItem("token"));
-
-// axios.defaults.headers.common["Authorization"] = `${localStorage.getItem(
-//   "token"
-// )}`;

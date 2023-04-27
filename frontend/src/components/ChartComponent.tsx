@@ -100,6 +100,8 @@ function eachFloor(myCount: string) {
 
 //   return { labels, counts };
 // }
+let lable = "";
+
 function groupDataByDay(data: MyData[], settings: MySettings) {
   const groups: { [key: string]: number } = {};
 
@@ -121,13 +123,16 @@ function groupDataByDay(data: MyData[], settings: MySettings) {
     const day = date.toDateString();
     let count = 0;
     if (settings.Type == "all") {
+      lable = "All Floors";
       count = eachFloor(datum.Count);
     } else if (settings.Type == "floor") {
       if (datum.Level == settings.Level) {
+        lable = "Level " + settings.Level.charAt(1);
         count = eachFloor(datum.Count);
       }
     } else if (settings.Type == "room") {
       if (datum.Name == settings.Name) {
+        lable = "Room " + settings.Name;
         count = eachFloor(datum.Count);
       }
     }
@@ -167,7 +172,7 @@ export function MyChart({ data, settings }: MyChartProps) {
     labels,
     datasets: [
       {
-        label: "Counts by Day",
+        label: lable,
         data: counts,
         backgroundColor: "rgba(255, 99, 132, 0.5)",
       },

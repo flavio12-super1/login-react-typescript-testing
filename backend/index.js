@@ -144,7 +144,6 @@ const validatePassword = (password) => {
 
 const verifyJWT = (req, res, next) => {
   if (req.headers.authorization) {
-    console.log("verifyJWT " + req.headers.authorization);
     const token = req.headers.authorization.split(" ")[1];
     if (!token) {
       res.send("token not found");
@@ -166,7 +165,6 @@ const verifyJWT = (req, res, next) => {
 const verify = (req, res, next) => {
   if (req.session && req.session.user && req.session.user.token) {
     const token = req.session.user.token;
-    console.log(token);
 
     jwt.verify(token, secret, (err, decoded) => {
       if (err) {
@@ -190,7 +188,6 @@ app.get("/isUserAuth", verifyJWT, (req, res) => {
 app.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
-    // console.log(req.headers);
     if (!(validateEmail(email) && validatePassword(password))) {
       console.log("invalid or empty fields");
       res.status(401).json({ error: "invalid or empty fields" });
@@ -220,8 +217,6 @@ app.post("/login", loginLimiter, async (req, res) => {
       console.log("login was successful");
 
       req.session.user = { userId: user._id, token: token };
-
-      // console.log("session: " + req.user);
 
       res.json({ token, error: null, user });
     }
@@ -258,6 +253,19 @@ app.post("/signup", loginLimiter, async (req, res) => {
   }
 });
 
+app.get("/getUser", verifyJWT, async (req, res) => {
+  const { email } = req.query;
+  console.log(email);
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    console.log("user exists");
+    res.status(201).json({ message: "success" });
+  } else {
+    console.log("user does not exist");
+    res.status(409).json({ message: "error" });
+  }
+});
+
 // Routes
 const testRoutes = require("./routes/test");
 app.use("/test", verifyJWT, testRoutes);
@@ -280,12 +288,73 @@ app.use((err, req, res, next) => {
 // You can use Socket.IO to ensure real-time updates between the server and clients. Initialize Socket.IO server and configure it as middleware:
 
 const io = require("socket.io")(server);
+const Room = require("./models/Room");
+const crypto = require("crypto");
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, secret);
+      console.log("decoded id: " + decoded.id);
+      socket.userId = decoded.id;
+      next();
+    } catch (err) {
+      next(new Error("invalid_token"));
+    }
+  } else {
+    next(new Error("unauthorized"));
+  }
+});
 
 io.on("connection", (socket) => {
-  console.log("A user connected");
+  socket.join(socket.userId);
+
+  console.log(`User ${socket.userId} connected`);
+
+  socket.on("createRoom", (roomName) => {
+    // console.log(`User ${socket.userId}: ` + msg);
+
+    crypto.randomBytes(8, (err, buf) => {
+      if (err) throw err;
+
+      const roomID = buf.toString("hex");
+
+      console.log(`${buf.length} bytes of random data: ${roomID}`);
+
+      const room = new Room({
+        roomID: roomID,
+        roomName: roomName,
+      });
+
+      room
+        .save()
+        .then((result) => {
+          console.log(result);
+          socket.emit("roomID", roomID);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  });
+
+  socket.on("sendMessage", async (data) => {
+    const email = data.email;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      console.log("user dosen't exist");
+      // return res.status(401).json({ error: "user dosen't exist" });
+    }
+    console.log("userID: " + user._id);
+    console.log(data.senderEmail + " says: " + data.message);
+    io.to(`${user._id}`).emit("message", data);
+  });
 
   socket.on("disconnect", () => {
-    console.log("A user disconnected");
+    console.log(`User ${socket.userId} disconnected`);
+    socket.leaveAll();
   });
 });
 
@@ -308,19 +377,26 @@ app.get("/dashboard", verify, (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 });
 
+app.get("/Lurker", verify, (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+
+app.get("/Lurker/:page", verify, (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+
 app.get(
   "/verify",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     console.log("body: " + req.user);
-    res.json({ message: "success" });
+    res.json({ message: "success", username: req.user.email });
   }
 );
 app.get(
   "/loginStatus",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    console.log("body: " + req.user.email);
     res.send({ loggedIn: true, user: req.user });
   }
 );

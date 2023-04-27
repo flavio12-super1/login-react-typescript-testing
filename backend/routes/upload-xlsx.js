@@ -158,6 +158,7 @@ async function joinData(data) {
 }
 
 router.get("/file", async (req, res, next) => {
+  console.log("request made to /file ......................... ");
   try {
     const fileNameZero = req.query.fileDataZero;
     const fileName = req.query.fileName;
@@ -246,12 +247,31 @@ router.get("/file", async (req, res, next) => {
       "Content-Type": "application/json",
     });
 
-    await joinData().then((response) => {
-      console.log(response);
-      data.joinData = response;
-      // console.log(data);
+    console.log("waiting for data to send ......................... ");
+    // console.log(data);
+    console.log(
+      "fileName: " +
+        data.fileName +
+        " : " +
+        "fileNameZero: " +
+        data.fileNameZero
+    );
+    if (data.fileNameZero != "No File" && data.fileName != "No File") {
+      console.log("calling function ........................");
+      await joinData().then((response) => {
+        // console.log(response);
+        data.joinData = response;
+        console.log("sending data to frontend ......................... ");
+        // console.log(data);
+        res.json(data);
+      });
+    } else {
+      console.log(
+        "sending partial data to frontend ......................... "
+      );
       res.json(data);
-    });
+    }
+    console.log("end of function ............................");
 
     // }
   } catch (err) {

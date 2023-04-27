@@ -1,0 +1,10 @@
+#lurkerContainer {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  border: solid gray;
+  box-sizing: border-box;
+}
+.inputStyle {
+  display: flex;
+}

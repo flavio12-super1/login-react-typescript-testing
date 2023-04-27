@@ -1,0 +1,63 @@
+#outerNavDiv {
+  padding-top: 5px;
+  border-right: solid 3px black;
+  width: 65px;
+  background-color: gray;
+}
+#innerNavDiv {
+  display: "flex";
+  flex-direction: "column";
+}
+.navStyle {
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px;
+}
+
+.divImg {
+  height: 58.33px;
+  width: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navIcons {
+  background-color: #2e8b8c;
+  border: solid;
+  border-radius: 15px;
+  cursor: pointer;
+  height: 55px;
+  width: 55px;
+  display: block;
+}
+.navIcons:hover {
+  border: solid black;
+}
+
+.bell {
+  position: absolute;
+}
+
+#notificationIcon {
+  align-items: center;
+  background-color: #720000;
+  border: solid;
+  border-radius: 50%;
+  display: flex;
+  height: 23px;
+  width: 23px;
+  justify-content: center;
+  position: relative;
+  right: -25px;
+  text-decoration: none;
+  top: -25px;
+  z-index: 1;
+}
+
+a:-webkit-any-link {
+  text-decoration: none;
+  cursor: pointer;
+}
