@@ -1,51 +1,148 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
+import axiosInstance from "../config/axiosConfig";
 import { Link } from "react-router-dom";
 import { UserContext } from "./Lurker";
 import spider from "./lurker-icons/spider.png";
+import servers from "./lurker-icons/servers.png";
+import groups from "./lurker-icons/groups.png";
+import messages from "./lurker-icons/messages.png";
 import explore from "./lurker-icons/explore.png";
 import bell from "./lurker-icons/bell.png";
 import profile from "./lurker-icons/profile.png";
+import more from "./lurker-icons/more.png";
 import "../styles/Nav.css";
 
 function Nav() {
   const userData = useContext(UserContext);
-  const { count, myEmail } = userData;
+  const { friendRequests, myEmail } = userData;
+  const [collaps, setCollaps] = useState(false);
+
+  //   useEffect(() => {
+  //     function handleClickOutside(event) {
+  //       if (event.target.closest(".popup") === null) {
+  //         setCollaps(false);
+  //       }
+  //     }
+
+  //     document.addEventListener("click", handleClickOutside);
+
+  //     return () => {
+  //       document.removeEventListener("click", handleClickOutside);
+  //     };
+  //   }, [collaps == true]);
+  const handleLogout = async (event) => {
+    event.preventDefault();
+
+    try {
+      axiosInstance
+        .get("http://localhost:8000/logout")
+        .then((res) => {
+          localStorage.removeItem("token");
+          window.location.replace(res.request.responseURL);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  function handleMore() {
+    setCollaps(!collaps);
+  }
+  function closePopup() {
+    setCollaps(false);
+  }
 
   return (
     <div id="outerNavDiv">
-      <nav id="innerNavDiv">
-        <div>
-          <Link to="/lurker/" className="navStyle">
-            <div className="divImg">
-              <img className="navIcons" src={spider} alt="spider" />
-            </div>
-          </Link>
+      <div id="innerNavDiv">
+        <nav>
+          <div>
+            <Link to="/lurker/" className="navStyle">
+              <div className="divImg">
+                <img className="navIcons" src={spider} alt="spider" />
+              </div>
+            </Link>
+          </div>
+          <div className="octagon">
+            <Link to="/lurker/channel/servers/" className="navStyle">
+              <div className="rounded-button">
+                <img className="octo-image" src={servers} alt="messages" />
+              </div>
+            </Link>
+            <Link to="/lurker/channel/groups/" className="navStyle">
+              <div className="rounded-button">
+                <img className="octo-image" src={groups} alt="messages" />
+              </div>
+            </Link>
+            <Link to="/lurker/channel/messages/" className="navStyle">
+              <div className="rounded-button">
+                <img className="octo-image" src={messages} alt="messages" />
+              </div>
+            </Link>
+          </div>
+          <div>
+            <Link to="/lurker/explore" className="navStyle">
+              <div className="divImg">
+                <img className="navIcons" src={explore} alt="explore" />
+              </div>
+            </Link>
+          </div>
+          {/* start notifications */}
+          <div>
+            <Link to="/lurker/notifications" className="navStyle">
+              <div className="divImg">
+                <img className="navIcons bell" src={bell} alt="notifications" />
+                {friendRequests.length > 0 ? (
+                  <div id="notificationIcon">{friendRequests.length}</div>
+                ) : null}
+              </div>
+            </Link>
+          </div>
+          {/* enednotifications  */}
+          <div>
+            <Link to={"/lurker/" + myEmail} className="navStyle">
+              <div className="divImg">
+                <img className="navIcons" src={profile} alt="profile" />
+              </div>
+            </Link>
+          </div>
+        </nav>
+      </div>
+      <div>
+        <div onClick={handleMore} className="navStyle">
+          <div className="divImg">
+            <img className="navIcons" src={more} alt="more" />
+          </div>
         </div>
-        <div>
-          <Link to="/lurker/explore" className="navStyle">
-            <div className="divImg">
-              <img className="navIcons" src={explore} alt="explore" />
+      </div>
+      <div id="popup">
+        {collaps ? (
+          <div>
+            <div>
+              <div id="backDrop" onClick={closePopup}></div>
             </div>
-          </Link>
-        </div>
-        {/* start notifications */}
-        <div>
-          <Link to="/lurker/notifications" className="navStyle">
-            <div className="divImg">
-              <img className="navIcons bell" src={bell} alt="notifications" />
-              {count > 0 ? <div id="notificationIcon">{count}</div> : null}
+            <div id="moreOuterDiv">
+              <div id="moreInnerDiv">
+                <div className="moreOptionsDiv">
+                  <div className="moreOptions">Settings</div>
+                  <div className="moreOptions">Themes</div>
+                </div>
+                <div id="separator"></div>
+                <div className="moreOptionsDiv">
+                  <div className="moreOptions">Accounts</div>
+                  <div className="moreOptions" onClick={handleLogout}>
+                    Log Out
+                  </div>
+                </div>
+              </div>
+              <div id="moreArrow"></div>
             </div>
-          </Link>
-        </div>
-        {/* enednotifications  */}
-        <div>
-          <Link to={"/lurker/" + myEmail} className="navStyle">
-            <div className="divImg">
-              <img className="navIcons" src={profile} alt="profile" />
-            </div>
-          </Link>
-        </div>
-      </nav>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

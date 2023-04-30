@@ -1,240 +1,12 @@
-// import React, { useContext, useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-// import axiosInstance from "../config/axiosConfig";
-
-// function Profile() {
-//   const { username } = useParams();
-//   const [user, setUser] = useState(null);
-//   const [isLoading, setIsLoading] = useState(true);
-
-//   useEffect(() => {
-//     axiosInstance
-//       .get("/verify")
-//       .then((response) => {
-//         console.log(response.data.username);
-//         setUser(response.data.username);
-//       })
-//       .catch((error) => {
-//         console.log(error);
-//       })
-//       .finally(() => {
-//         setIsLoading(false);
-//       });
-//   }, []);
-
-//   if (isLoading) {
-//     return <div>Loading...</div>;
-//   }
-
-//   const isOwnProfile = user && user === username;
-
-//   const ProfilePage = () => {
-//     return (
-//       <div>
-//         <div>Profile</div>
-//         <div>
-//           <span>Username: </span>
-//           <div>{username}</div>
-//           {isOwnProfile ? (
-//             <p>This is your own profile.</p>
-//           ) : (
-//             <p>This is someone else's profile.</p>
-//           )}
-//         </div>
-//       </div>
-//     );
-//   };
-
-//   async function getUser() {
-//     await axiosInstance
-//       .get("/getUser", {
-//         params: {
-//           email: username,
-//         },
-//       })
-//       .then((response) => {
-//         console.log(response.data.message);
-//         if (response.data.message == "success") {
-//           alert("found");
-//           return true;
-//         }
-//       })
-//       .catch((error) => {
-//         console.log(error);
-//       });
-
-//     alert("not found");
-//     return false;
-//   }
-
-//   return (
-//     <div>{getUser() ? <ProfilePage /> : <div>This user does not</div>}</div>
-//   );
-// }
-
-// export default Profile;
-// import React, { useContext, useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-// import axiosInstance from "../config/axiosConfig";
-
-// function Profile() {
-//   const { username } = useParams();
-//   const [user, setUser] = useState(null);
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [userFound, setUserFound] = useState(false);
-
-//   useEffect(() => {
-//     axiosInstance
-//       .get("/verify")
-//       .then((response) => {
-//         console.log(response.data.username);
-//         setUser(response.data.username);
-//       })
-//       .catch((error) => {
-//         console.log(error);
-//       })
-//       .finally(() => {
-//         setIsLoading(false);
-//       });
-//   }, []);
-
-//   useEffect(() => {
-//     async function getUser() {
-//       try {
-//         const response = await axiosInstance.get("/getUser", {
-//           params: {
-//             email: username,
-//           },
-//         });
-//         console.log(response.data.message);
-//         if (response.data.message === "success") {
-//           setUserFound(true);
-//         }
-//       } catch (error) {
-//         setUserFound(false);
-//         console.log(error);
-//       }
-//     }
-
-//     getUser();
-//   }, [username]);
-
-//   if (isLoading) {
-//     return <div>Loading...</div>;
-//   }
-
-//   const isOwnProfile = user && user === username;
-
-//   const ProfilePage = () => {
-//     return (
-//       <div>
-//         <div>Profile</div>
-//         <div>
-//           <span>Username: </span>
-//           <div>{username}</div>
-//           {isOwnProfile ? (
-//             <p>This is your own profile.</p>
-//           ) : (
-//             <p>This is someone else's profile.</p>
-//           )}
-//         </div>
-//       </div>
-//     );
-//   };
-
-//   return (
-//     <div>
-//       {userFound ? <ProfilePage /> : <div>This user does not exist.</div>}
-//     </div>
-//   );
-// }
-
-// export default Profile;
-
-// import React, { useContext, useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-// import axiosInstance from "../config/axiosConfig";
-
-// function Profile() {
-//   const { username } = useParams();
-//   const [user, setUser] = useState(null);
-//   const [isLoading, setIsLoading] = useState(true);
-
-//   useEffect(() => {
-//     axiosInstance
-//       .get("/verify")
-//       .then((response) => {
-//         console.log(response.data.username);
-//         setUser(response.data.username);
-//       })
-//       .catch((error) => {
-//         console.log(error);
-//       })
-//       .finally(() => {
-//         setIsLoading(false);
-//       });
-//   }, []);
-
-//   async function checkUserExists() {
-//     try {
-//       const response = await axiosInstance.get("/getUser", {
-//         params: {
-//           email: username,
-//         },
-//       });
-//       console.log(response.data.message);
-//       if (response.data.message === "success") {
-//         console.log("success");
-//         return true;
-//       }
-//       //   return response.data.message === "success";
-//     } catch (error) {
-//       console.log(error);
-//       return false;
-//     }
-//   }
-
-//   if (isLoading) {
-//     return <div>Loading...</div>;
-//   }
-
-//   const isOwnProfile = user && user === username;
-
-//   const ProfilePage = () => {
-//     return (
-//       <div>
-//         <div>Profile</div>
-//         <div>
-//           <span>Username: </span>
-//           <div>{username}</div>
-//           {isOwnProfile ? (
-//             <p>This is your own profile.</p>
-//           ) : (
-//             <p>This is someone else's profile.</p>
-//           )}
-//         </div>
-//       </div>
-//     );
-//   };
-
-//   return (
-//     <div>
-//       {checkUserExists() == true ? (
-//         <ProfilePage />
-//       ) : (
-//         <div>This user does not exist.</div>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default Profile;
-
 import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../config/axiosConfig";
+import { UserContext } from "./Lurker";
+import "../styles/Profile.css";
 
 function Profile() {
+  const userData = useContext(UserContext);
+  const { socket, myEmail, userID } = userData;
   const { username } = useParams();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -279,17 +51,45 @@ function Profile() {
     return <div>Loading...</div>;
   }
 
-  const ProfilePage = () => {
+  const sendFollowRequest = () => {
+    const data = {
+      user: username,
+      email: myEmail,
+      userID: userID,
+    };
+    console.log(data);
+    try {
+      socket.emit("sendFollowRequest", data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const OtherUser = () => {
     return (
       <div>
-        <div>Profile</div>
+        <button onClick={() => sendFollowRequest()}>follow</button>
+        <div>This is someone else's profile</div>
+      </div>
+    );
+  };
+
+  const ProfilePage = () => {
+    return (
+      <div id="profileOuterDiv">
+        <div>
+          <img
+            src="https://www.primemotorz.com/wp-content/uploads/2019/08/secondary-banner-placeholder.jpg"
+            id="banner"
+          />
+        </div>
         <div>
           <span>Username: </span>
           <div>{username}</div>
           {user && user === username ? (
             <p>This is your own profile.</p>
           ) : (
-            <p>This is someone else's profile.</p>
+            <OtherUser />
           )}
         </div>
       </div>
@@ -297,7 +97,7 @@ function Profile() {
   };
 
   return (
-    <div>
+    <div id="profileOuterDiv">
       {user != null ? <ProfilePage /> : <div>This user does not exist</div>}
     </div>
   );

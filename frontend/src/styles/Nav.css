@@ -1,12 +1,13 @@
 #outerNavDiv {
   padding-top: 5px;
-  border-right: solid 3px black;
-  width: 65px;
-  background-color: gray;
+  border: solid 3px black;
+  min-width: 65px;
+  background-color: #100f13;
+  display: flex;
+  flex-flow: column;
 }
 #innerNavDiv {
-  display: "flex";
-  flex-direction: "column";
+  flex-grow: 1;
 }
 .navStyle {
   color: white;
@@ -25,7 +26,7 @@
 }
 
 .navIcons {
-  background-color: #2e8b8c;
+  background-color: #484fa9;
   border: solid;
   border-radius: 15px;
   cursor: pointer;
@@ -60,4 +61,97 @@
 a:-webkit-any-link {
   text-decoration: none;
   cursor: pointer;
+}
+
+.octagon {
+  align-items: center;
+  background-color: #4c68af;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 5px auto;
+  position: relative;
+  transform: rotate(0deg);
+  width: 55px;
+  border: solid white;
+  padding-top: 5px;
+  border-radius: 15px;
+}
+
+.rounded-button {
+  background-color: #fff;
+  border: solid #000;
+  border-radius: 15px;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.75);
+  cursor: pointer;
+  height: 45px;
+  outline: none;
+  width: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.octo-image {
+  width: 35px;
+}
+
+/* more container css */
+#moreOuterDiv {
+  position: absolute;
+  bottom: 5px;
+  left: 90px;
+  border: solid white;
+  border-radius: 15px;
+}
+#moreInnerDiv {
+  position: relative;
+  width: 150px;
+  background-color: #484fa9;
+  border-radius: 14px;
+  color: white;
+  padding: 5px;
+  z-index: 99;
+}
+#moreArrow {
+  height: 20px;
+  width: 20px;
+  background-color: #484fa9;
+  position: absolute;
+  bottom: 20px;
+  left: -10px;
+  border: solid white;
+  transform: rotate(45deg);
+  z-index: 0;
+}
+
+#backDrop {
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  top: 0;
+}
+
+#moreInnerDiv {
+}
+.moreOptionsDiv {
+}
+#separator {
+  border: solid;
+}
+.moreOptions {
+  background-color: #29273e;
+  border: solid;
+  border-radius: 15px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 22px;
+  height: 35px;
+  margin: 5px;
+  display: flex;
+  padding-left: 10px;
+  align-items: center;
+}
+.moreOptions:hover {
+  background-color: #60438f;
 }

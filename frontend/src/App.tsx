@@ -15,6 +15,8 @@ import Chat from "./components/Chat";
 import Notifications from "./components/Notifications";
 import Profile from "./components/Profile";
 import Explore from "./components/navComponents/Explore";
+import Channels from "./components/navComponents/Channels";
+import Messages from "./components/navComponents/Messages";
 
 const socket = io({
   auth: {
@@ -70,6 +72,22 @@ function App() {
           <Route
             path="/lurker/:username"
             element={<Lurker page={<Profile />} />}
+          />
+          <Route
+            path="/lurker/channel/server/"
+            element={<Lurker page={<Channels />} />}
+          />
+          <Route
+            path="/lurker/channel/server/:channelID"
+            element={<Lurker page={<Channels />} />}
+          />
+          <Route
+            path="/lurker/channel/messages/"
+            element={<Lurker page={<Messages />} />}
+          />
+          <Route
+            path="/lurker/channel/messages/:channelID"
+            element={<Lurker page={<Messages />} />}
           />
         </Routes>
       </SocketContext.Provider>

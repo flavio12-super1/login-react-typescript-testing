@@ -109,23 +109,27 @@ const mdb = mongoose.connection;
 mdb.on("error", (error) => console.error(error));
 mdb.once("open", () => console.log("Connected to Mongoose"));
 
-const userSchema = new mongoose.Schema(
-  {
-    email: { type: String, required: true },
-    password: { type: String, required: true, select: true },
-  },
-  { strict: true }
-);
+// const userSchema = new mongoose.Schema(
+//   {
+//     email: { type: String, required: true },
+//     password: { type: String, required: true, select: true },
+//     notifications: { type: [mongoose.Schema.Types.ObjectId], ref: "User" },
+//   },
+//   { strict: true }
+// );
 
-userSchema.methods.isValidPassword = async function (password) {
-  try {
-    const compare = await bcrypt.compare(password, this.password);
-    return compare;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Error comparing passwords");
-  }
-};
+// userSchema.methods.isValidPassword = async function (password) {
+//   try {
+//     const compare = await bcrypt.compare(password, this.password);
+//     return compare;
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error("Error comparing passwords");
+//   }
+// };
+
+// const User = mongoose.model("User", userSchema);
+const userSchema = require("./models/userSchema");
 
 const User = mongoose.model("User", userSchema);
 
@@ -295,6 +299,8 @@ app.use("/upload", verifyJWT, uploadRoutes);
 // Routes
 const deleteRoute = require("./routes/deleteRoute");
 app.use("/delete", verifyJWT, deleteRoute);
+const userData = require("./routes/userData");
+app.use("/userData", verifyJWT, userData);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -306,6 +312,8 @@ app.use((err, req, res, next) => {
 
 const io = require("socket.io")(server);
 const Room = require("./models/Room");
+const Channel = require("./models/Channel");
+const Message = require("./models/Message");
 const crypto = require("crypto");
 
 io.use((socket, next) => {
@@ -364,9 +372,104 @@ io.on("connection", (socket) => {
       console.log("user dosen't exist");
       // return res.status(401).json({ error: "user dosen't exist" });
     }
-    console.log("userID: " + user._id);
+
+    // console.log("userID: " + user._id);
+    console.log(data);
     console.log(data.senderEmail + " says: " + data.message);
     io.to(`${user._id}`).emit("message", data);
+  });
+
+  socket.on("sendFollowRequest", async (data) => {
+    const user = await User.findOne({ email: data.user });
+    if (user) {
+      console.log(data);
+      console.log(data.email + " made a friend request to: " + user.email);
+      // console.log("user exists: " + user._id);
+
+      crypto.randomBytes(8, (err, buf) => {
+        if (err) throw err;
+
+        const id = buf.toString("hex");
+
+        console.log(`${buf.length} bytes of random data: ${id}`);
+
+        User.updateOne(
+          { _id: user._id },
+          { $push: { notifications: { id: id, userID: data.userID } } }
+        )
+          .then((result) => {
+            console.log(result);
+            io.to(`${user._id}`).emit("friendRequest", data);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      });
+
+      // res.status(201).json({ message: "success" });
+    } else {
+      console.log("user does not exist");
+      // res.status(409).json({ message: "error" });
+    }
+  });
+  socket.on("acceptRequest", async (data) => {
+    const user = await User.findOne({ _id: data.id });
+    if (!user) {
+      console.log("User does not exist");
+      return;
+    }
+
+    // Generate a random message ID
+    const messageId = crypto.randomBytes(8).toString("hex");
+
+    //this works for adding new messages, sort off
+    // // create a new message
+    // const messageData = {
+    //   senderName: data.myEmail,
+    //   recipientName: user.email,
+    //   message: null,
+    //   images: [],
+    //   messageReferance: null, // this should be updated after the channel is created
+    // };
+
+    // const message = new Message({
+    //   messageID: messageId,
+    //   message: [messageData], // store message data as an array of Data objects
+    // });
+
+    const message = new Message({
+      messageID: messageId,
+      message: [null], // store message data as an array of Data objects
+    });
+
+    try {
+      const savedMessage = await message.save();
+
+      // Generate a random room ID
+      const channelID = crypto.randomBytes(8).toString("hex");
+
+      // Create a new channel with the message reference
+      const channel = new Channel({
+        channelID: channelID,
+        members: [data.userID, user.email],
+        messageReferanceID: savedMessage.messageID,
+      });
+
+      const savedChannel = await channel.save();
+
+      const package = {
+        user1: user._id,
+        user2: data.userID,
+        channelID: savedChannel.channelID,
+      };
+      console.log(package);
+      console.log(`${data.userID} accepted ${user._id}'s friend request`);
+      io.to(`${user._id}`)
+        .to(socket.userId)
+        .emit("friendRequestAccepted", package);
+    } catch (error) {
+      console.log("Error creating channel:", error);
+    }
   });
 
   socket.on("disconnect", () => {
@@ -399,6 +502,18 @@ app.get("/Lurker", verify, (req, res) => {
 });
 
 app.get("/Lurker/:page", verify, (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+app.get("/Lurker/channel/server/", verify, (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+app.get("/Lurker/channel/server/:channelID", verify, (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+app.get("/Lurker/channel/messages/", verify, (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+app.get("/Lurker/channel/messages/:channelID", verify, (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 });
 
