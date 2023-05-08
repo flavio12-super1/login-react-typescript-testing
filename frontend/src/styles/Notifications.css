@@ -1,0 +1,53 @@
+#notificationOuterDiv {
+  display: flex;
+  height: 45px;
+  border: solid black;
+  border-radius: 10px;
+  width: 541px;
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+.notificationInformation {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background-color: black;
+  width: 400px;
+  padding-left: 5px;
+  border-radius: 9px 0px 0px 9px;
+}
+.notificationOptions {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  padding: 5px;
+  background-color: black;
+  border-radius: 0px 9px 9px 0px;
+}
+.notificationEmailBtn {
+  margin: 5px;
+  height: -webkit-fill-available;
+}
+.notificationAcceptBtn {
+  height: 100%;
+  width: 50%;
+  background-color: #272727;
+  border: none;
+  cursor: pointer;
+  margin-right: 5px;
+  border-radius: 4px;
+}
+.notificationAcceptBtn:hover {
+  background-color: rgb(36, 112, 36);
+}
+.notificationDenyBtn {
+  height: 100%;
+  width: 50%;
+  background-color: #272727;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.notificationDenyBtn:hover {
+  background-color: rgb(112, 36, 36);
+}

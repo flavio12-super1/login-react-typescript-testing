@@ -119,19 +119,21 @@ router.get("/", async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     const notifications = user.notifications;
-    console.log(notifications);
+    // console.log(notifications);
     const promises = notifications.map((notification) => {
       return User.findById(notification.userID).select("email").lean().exec();
     });
     const results = await Promise.all(promises);
-    console.log(results);
+    // console.log(results);
     const notificationsWithUsername = results.map((result, index) => {
       return {
         id: notifications[index].id,
+        userID: notifications[index].userID,
         email: result.email,
       };
     });
-    console.log(notificationsWithUsername);
+    // console.log(notificationsWithUsername);
+    console.log("notifications being sent to client");
     res.send({ notifications: notificationsWithUsername });
   } catch (err) {
     next(err);

@@ -97,6 +97,14 @@ a:-webkit-any-link {
 }
 
 /* more container css */
+
+#backDrop {
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  top: 0;
+}
+
 #moreOuterDiv {
   position: absolute;
   bottom: 5px;
@@ -123,13 +131,6 @@ a:-webkit-any-link {
   border: solid white;
   transform: rotate(45deg);
   z-index: 0;
-}
-
-#backDrop {
-  position: fixed;
-  height: 100vh;
-  width: 100vw;
-  top: 0;
 }
 
 #moreInnerDiv {

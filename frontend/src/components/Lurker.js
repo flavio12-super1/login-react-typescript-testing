@@ -17,6 +17,7 @@ function Lurker(props) {
   const [friendRequests, setFriendRequest] = useState([]);
   const myEmail = localStorage.getItem("email");
   const userID = localStorage.getItem("userID");
+
   let navigate = useNavigate();
   console.log("reloaded");
 
@@ -34,6 +35,7 @@ function Lurker(props) {
           ...response.data.notifications.map((user) => ({
             email: user.email,
             id: user.id,
+            userID: user.userID,
           })),
           ...notification,
         ]);
@@ -41,12 +43,12 @@ function Lurker(props) {
       .catch((err) => {
         console.log(err);
       });
-    const handleMessageReceived = (data) => {
-      alert(data.senderEmail + " says: " + data.message);
-      console.log(data);
-      setNotifications((notification) => [data, ...notification]);
-      SetCount((prevCount) => prevCount + 1);
-    };
+    // const handleMessageReceived = (data) => {
+    //   alert(data.senderEmail + " says: " + data.message);
+    //   console.log(data);
+    //   setNotifications((notification) => [data, ...notification]);
+    //   SetCount((prevCount) => prevCount + 1);
+    // };
     const handleFriendReuest = (data) => {
       alert("Friend request from" + data.email);
       console.log(data);
@@ -56,14 +58,13 @@ function Lurker(props) {
     const handleFriendRequestAccepted = (data) => {
       // alert("Friend request from" + data.myEmail);
       console.log(data);
-      alert(data.channelID);
-      navigate("/lurker/channel/messages/" + data.channelID);
+      socket.emit("addChannel", data.channelID);
+      alert("channel id: " + data.channelID);
 
-      // setFriendRequest((notification) => [data, ...notification]);
-      // SetCount((prevCount) => prevCount + 1);
+      navigate("/lurker/channel/messages/" + data.channelID);
     };
 
-    socket.on("message", handleMessageReceived);
+    // socket.on("message", handleMessageReceived);
     socket.on("friendRequest", handleFriendReuest);
     socket.on("friendRequestAccepted", handleFriendRequestAccepted);
 
@@ -76,10 +77,14 @@ function Lurker(props) {
     // socket.emit("denyRequest", username, myEmail);
     let filteredArray = friendRequests.filter((item) => item.id !== id);
     setFriendRequest(filteredArray);
+    const data = {
+      id: id,
+    };
+    socket.emit("denyFriendRequest", data);
     alert("friend request denied: " + id);
   }
 
-  function acceptRequest(id) {
+  function acceptRequest(id, userID) {
     const data = {
       id: id,
       userID: userID,
@@ -87,7 +92,7 @@ function Lurker(props) {
     socket.emit("acceptRequest", data);
     let filteredArray = friendRequests.filter((item) => item.id !== id);
     setFriendRequest(filteredArray);
-    alert("friend request accepted: " + id);
+    alert("friend request accepted: " + userID);
   }
 
   return (

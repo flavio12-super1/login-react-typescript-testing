@@ -54,19 +54,20 @@ store.on("error", function (error) {
   console.log(error);
 });
 
-app.use(
-  session({
-    key: "userId",
-    secret: "flavioHerrera",
-    resave: false,
-    saveUninitialized: false,
-    store: store,
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24,
-      secure: false,
-    },
-  })
-);
+const sessionMiddleware = session({
+  key: "userId",
+  secret: "flavioHerrera",
+  resave: false,
+  saveUninitialized: false,
+  store: store,
+  channelList: [],
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24,
+    secure: false,
+  },
+});
+
+app.use(sessionMiddleware);
 
 app.use(passport.initialize());
 
@@ -183,6 +184,26 @@ const verify = (req, res, next) => {
   }
 };
 
+const checkRoomAccess = async (req, res, next) => {
+  const { channelID } = req.params;
+  console.log("roomID: " + channelID);
+  const channel = await Channel.findOne({ channelID: channelID });
+  if (channel) {
+    console.log("channel exists");
+    console.log(req.userId);
+    console.log(channel.members);
+    if (channel.members.includes(req.userId)) {
+      console.log("user is authorized to access this room");
+      next();
+    } else {
+      res.json({ message: "user is not authorized to access this room" });
+    }
+  } else {
+    res.json({ message: "channel does not exist" });
+  }
+  console.log("channel: " + channel);
+};
+
 //test route
 app.get("/isUserAuth", verifyJWT, (req, res) => {
   res.json({ message: "user is authenticated to make api requests" });
@@ -218,11 +239,10 @@ app.post("/login", loginLimiter, async (req, res) => {
         expiresIn: 60 * 60 * 24,
       });
 
-      console.log("login was successful");
-
-      req.session.user = { userId: user._id, token: token };
+      req.session.user = { userId: user._id, token: token, channelList: [] };
 
       res.json({ token, error: null, user });
+      console.log("login was successful");
     }
   } catch (error) {
     console.error(error);
@@ -287,27 +307,6 @@ app.post("/mySearch", verifyJWT, async (req, res) => {
   }
 });
 
-// Routes
-const testRoutes = require("./routes/test");
-app.use("/test", verifyJWT, testRoutes);
-// Routes
-const chartRoutes = require("./routes/chart");
-app.use("/chart", verifyJWT, chartRoutes);
-// Routes
-const uploadRoutes = require("./routes/upload-xlsx");
-app.use("/upload", verifyJWT, uploadRoutes);
-// Routes
-const deleteRoute = require("./routes/deleteRoute");
-app.use("/delete", verifyJWT, deleteRoute);
-const userData = require("./routes/userData");
-app.use("/userData", verifyJWT, userData);
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Something went wrong!" });
-});
-
 // You can use Socket.IO to ensure real-time updates between the server and clients. Initialize Socket.IO server and configure it as middleware:
 
 const io = require("socket.io")(server);
@@ -316,13 +315,22 @@ const Channel = require("./models/Channel");
 const Message = require("./models/Message");
 const crypto = require("crypto");
 
+// convert a connect middleware to a Socket.IO middleware
+const wrap = (middleware) => (socket, next) =>
+  middleware(socket.request, {}, next);
+
+io.use(wrap(sessionMiddleware));
+
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
+  // const session = socket.request.session;
+  // console.log(session);
   if (token) {
     try {
       const decoded = jwt.verify(token, secret);
       console.log("decoded id: " + decoded.id);
       socket.userId = decoded.id;
+      // socket.session = socket.request.session;
       next();
     } catch (err) {
       next(new Error("invalid_token"));
@@ -334,6 +342,8 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
   socket.join(socket.userId);
+  const session = socket.request.session;
+  // console.log(session.user);
 
   console.log(`User ${socket.userId} connected`);
 
@@ -362,6 +372,14 @@ io.on("connection", (socket) => {
           console.log(err);
         });
     });
+  });
+
+  socket.on("message", async (data) => {
+    console.log(data.message);
+    const dataObject = {
+      message: data.message,
+    };
+    io.sockets.in(data.channelID).emit("message", dataObject);
   });
 
   socket.on("sendMessage", async (data) => {
@@ -412,8 +430,23 @@ io.on("connection", (socket) => {
       // res.status(409).json({ message: "error" });
     }
   });
+  //this works for adding new messages, sort off
+  // // create a new message
+  // const messageData = {
+  //   senderName: data.myEmail,
+  //   recipientName: user.email,
+  //   message: null,
+  //   images: [],
+  //   messageReferance: null, // this should be updated after the channel is created
+  // };
+
+  // const message = new Message({
+  //   messageID: messageId,
+  //   message: [messageData], // store message data as an array of Data objects
+  // });
+
   socket.on("acceptRequest", async (data) => {
-    const user = await User.findOne({ _id: data.id });
+    const user = await User.findOne({ _id: data.userID });
     if (!user) {
       console.log("User does not exist");
       return;
@@ -421,21 +454,6 @@ io.on("connection", (socket) => {
 
     // Generate a random message ID
     const messageId = crypto.randomBytes(8).toString("hex");
-
-    //this works for adding new messages, sort off
-    // // create a new message
-    // const messageData = {
-    //   senderName: data.myEmail,
-    //   recipientName: user.email,
-    //   message: null,
-    //   images: [],
-    //   messageReferance: null, // this should be updated after the channel is created
-    // };
-
-    // const message = new Message({
-    //   messageID: messageId,
-    //   message: [messageData], // store message data as an array of Data objects
-    // });
 
     const message = new Message({
       messageID: messageId,
@@ -451,25 +469,77 @@ io.on("connection", (socket) => {
       // Create a new channel with the message reference
       const channel = new Channel({
         channelID: channelID,
-        members: [data.userID, user.email],
+        members: [socket.userId, user._id],
         messageReferanceID: savedMessage.messageID,
       });
 
       const savedChannel = await channel.save();
 
       const package = {
-        user1: user._id,
-        user2: data.userID,
+        user1: socket.userId,
+        user2: user._id,
         channelID: savedChannel.channelID,
       };
       console.log(package);
-      console.log(`${data.userID} accepted ${user._id}'s friend request`);
+
+      console.log(`${socket.userId} accepted ${user._id}'s friend request`);
       io.to(`${user._id}`)
         .to(socket.userId)
         .emit("friendRequestAccepted", package);
     } catch (error) {
       console.log("Error creating channel:", error);
     }
+  });
+
+  socket.on("addChannel", async (data) => {
+    console.log("addChannel: " + data);
+    session.user.channelList.push(data);
+    session.save();
+  });
+
+  socket.on("denyFriendRequest", async (data) => {
+    const user = await User.findOne({ _id: socket.userId });
+    if (!user) {
+      console.log("User does not exist");
+      return;
+    }
+
+    // User.updateOne(
+    //   { _id: socket.userId },
+    //   {
+    //     $pull: {
+    //       notifications: data.id,
+    //     },
+    //   },
+    //   function (err, result) {
+    //     if (err) {
+    //       console.log(err);
+    //     } else {
+    //       console.log(result);
+    //     }
+    //   }
+    // );
+
+    User.updateOne(
+      { _id: socket.userId },
+      { $pull: { notifications: { id: data.id } } }
+    )
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
+    console.log("notification removed: " + data.id);
+  });
+
+  socket.on("joinRoom", (room) => {
+    //use socket.userID to check if user has access to room.room
+
+    socket.join(room);
+
+    console.log("joined => " + room);
   });
 
   socket.on("disconnect", () => {
@@ -513,8 +583,42 @@ app.get("/Lurker/channel/server/:channelID", verify, (req, res) => {
 app.get("/Lurker/channel/messages/", verify, (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 });
-app.get("/Lurker/channel/messages/:channelID", verify, (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+app.get(
+  "/Lurker/channel/messages/:channelID",
+  verify,
+  checkRoomAccess,
+  (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+  }
+);
+
+// Routes
+// Set io to app
+app.set("io", io);
+const testRoutes = require("./routes/test");
+app.use("/test", verifyJWT, testRoutes);
+// Routes
+const chartRoutes = require("./routes/chart");
+app.use("/chart", verifyJWT, chartRoutes);
+// Routes
+const uploadRoutes = require("./routes/upload-xlsx");
+app.use("/upload", verifyJWT, uploadRoutes);
+// Routes
+const deleteRoute = require("./routes/deleteRoute");
+app.use("/delete", verifyJWT, deleteRoute);
+const userData = require("./routes/userData");
+app.use("/userData", verifyJWT, userData);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
+});
+
+app.post("/getMessages", async (req, res) => {
+  const { roomID } = req.body;
+  console.log(roomID);
+  res.json("hello");
 });
 
 app.get(
@@ -542,6 +646,46 @@ app.get("/logout", function (req, res) {
     }
   });
 });
+
+const Redis = require("ioredis");
+const redis = new Redis();
+
+async function main() {
+  // set an array in Redis
+  await redis.lpush("myArray", "element1", "element2", "element3");
+
+  // get the array from Redis
+  const myArray = await redis.lrange("myArray", 0, -1);
+  console.log(myArray); // ["element3", "element2", "element1"]
+}
+
+main().catch(console.error);
+
+// const redis = require("redis");
+// const client = redis.createClient();
+
+// client.on("error", function (error) {
+//   console.error(error);
+// });
+
+// client.set("key", "value", redis.print);
+// client.get("key", redis.print);
+// const redis = require("redis");
+// const client = redis.createClient();
+
+// client.on("error", (err) => {
+//   console.error(err);
+// });
+
+// client.set("myArr", JSON.stringify([1, 2, 3]), (err) => {
+//   if (err) throw err;
+//   console.log("Array set successfully!");
+// });
+
+// client.get("myArr", (err, reply) => {
+//   if (err) throw err;
+//   console.log("Retrieved array:", JSON.parse(reply));
+// });
 
 server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
