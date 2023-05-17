@@ -15,6 +15,7 @@ function Lurker(props) {
   const [count, SetCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const [friendRequests, setFriendRequest] = useState([]);
+  const [friendsList, setFriendsList] = useState([]);
   const myEmail = localStorage.getItem("email");
   const userID = localStorage.getItem("userID");
 
@@ -39,6 +40,15 @@ function Lurker(props) {
           })),
           ...notification,
         ]);
+        setFriendsList((friend) => [
+          ...response.data.friends.map((user) => ({
+            email: user.email,
+            id: user.id,
+            userID: user.userID,
+            channelID: user.channelID,
+          })),
+          ...friend,
+        ]);
       })
       .catch((err) => {
         console.log(err);
@@ -58,6 +68,7 @@ function Lurker(props) {
     const handleFriendRequestAccepted = (data) => {
       // alert("Friend request from" + data.myEmail);
       console.log(data);
+      setFriendsList((friends) => [data, ...friends]);
       socket.emit("addChannel", data.channelID);
       alert("channel id: " + data.channelID);
 
@@ -105,6 +116,7 @@ function Lurker(props) {
           socket,
           notifications,
           friendRequests,
+          friendsList,
           denyRequest,
           acceptRequest,
         }}

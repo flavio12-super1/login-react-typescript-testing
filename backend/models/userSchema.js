@@ -15,6 +15,20 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    friendList: [
+      {
+        userID: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        channelID: {
+          type: String,
+          ref: "User",
+          required: true,
+        },
+      },
+    ],
   },
   { strict: true }
 );

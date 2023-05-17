@@ -5,7 +5,25 @@
 }
 #messagesNavContainer {
   display: flex;
+  flex-wrap: wrap;
 }
+
+#conversationBtn {
+  display: flex;
+  font-size: 24px;
+  border: solid lightgray;
+  height: 100%;
+  align-items: center;
+  border-radius: 15px;
+  background-color: #55457f;
+  padding-left: 5px;
+  cursor: pointer;
+}
+#navSmallIcon {
+  width: 30px;
+  margin: 5px;
+}
+
 #searchMessages {
   display: flex;
   flex-grow: 1;
@@ -20,6 +38,7 @@
   background-color: #4c68af;
   width: fit-content;
   width: 357px;
+  margin-right: 5px;
 }
 #messagesNavSearchDiv {
   flex-grow: 1;
@@ -53,8 +72,8 @@ input:focus {
 }
 
 .messagesNavElements {
-  width: 58.33px;
-  margin-left: 5px;
+  /* width: 58.33px; */
+  margin-right: 5px;
 }
 
 #messagesNav {
@@ -71,9 +90,68 @@ input:focus {
   flex-grow: 1;
 }
 #messagesInnerDiv {
-  flex-grow: 1;
-  padding: 5px;
-  border: solid white;
-  border-radius: 15px;
   background-color: #131423;
+  border: solid #fff;
+  border-radius: 15px;
+  flex-grow: 1;
+  display: flex;
+}
+
+#messagesInnerDivLeft {
+  display: flex;
+  flex-direction: column;
+  min-width: 243px;
+  align-items: center;
+  background-color: #222f53;
+  border-right: solid black;
+  border-radius: 13.5px 0px 0px 13.5px;
+}
+#chatDiv {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+#chatMessagesDiv {
+  flex-grow: 1;
+  /* overflow-y: scroll; */
+  padding: 5px;
+}
+.messageDiv {
+  white-space: break-spaces;
+}
+
+#outerSlateDiv {
+  /* flex-basis: 53px; */
+  min-height: 53px;
+  border-top: solid;
+  background-color: #0d3777;
+  display: flex;
+}
+#outerTxtInput {
+  margin: 5px;
+  padding: 5px;
+  /* height: -webkit-fill-available; */
+  width: -webkit-fill-available;
+  background-color: #100e3b;
+  align-items: center;
+  font-size: 24px;
+  display: flex;
+}
+
+/* #txtInput {
+  color: red;
+  white-space: pre;
+} */
+
+#txtInput {
+  color: red;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1;
+}
+::placeholder {
+  color: white;
 }

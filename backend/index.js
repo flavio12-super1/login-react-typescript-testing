@@ -196,10 +196,12 @@ const checkRoomAccess = async (req, res, next) => {
       console.log("user is authorized to access this room");
       next();
     } else {
-      res.json({ message: "user is not authorized to access this room" });
+      // res.json({ message: "user is not authorized to access this room" });
+      res.redirect("/lurker");
     }
   } else {
-    res.json({ message: "channel does not exist" });
+    // res.json({ message: "channel does not exist" });
+    res.redirect("/lurker");
   }
   console.log("channel: " + channel);
 };
@@ -239,7 +241,12 @@ app.post("/login", loginLimiter, async (req, res) => {
         expiresIn: 60 * 60 * 24,
       });
 
-      req.session.user = { userId: user._id, token: token, channelList: [] };
+      req.session.user = {
+        userId: user._id,
+        token: token,
+        userName: user.email,
+        channelList: [],
+      };
 
       res.json({ token, error: null, user });
       console.log("login was successful");
@@ -375,8 +382,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("message", async (data) => {
+    console.log(session.user.userName);
     console.log(data.message);
     const dataObject = {
+      username: session.user.userName,
       message: data.message,
     };
     io.sockets.in(data.channelID).emit("message", dataObject);
@@ -483,9 +492,68 @@ io.on("connection", (socket) => {
       console.log(package);
 
       console.log(`${socket.userId} accepted ${user._id}'s friend request`);
-      io.to(`${user._id}`)
-        .to(socket.userId)
-        .emit("friendRequestAccepted", package);
+
+      User.updateOne(
+        { _id: user._id },
+        {
+          $push: {
+            friendList: {
+              userID: socket.userId,
+              channelID: savedChannel.channelID,
+            },
+          },
+        }
+      )
+        .then((result) => {
+          // const packageData = {
+          //   userID: socket.userId,
+          //   email: session.user.userName,
+          //   channelID: savedChannel.channelID,
+          // };
+          const packageData = {
+            userID: user._id,
+            email: user.email,
+            channelID: savedChannel.channelID,
+          };
+          console.log(packageData);
+
+          io.to(socket.userId).emit("friendRequestAccepted", packageData);
+          console.log(result);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+
+      User.updateOne(
+        { _id: socket.userId },
+        {
+          $push: {
+            friendList: {
+              userID: user._id,
+              channelID: savedChannel.channelID,
+            },
+          },
+        }
+      )
+        .then((result) => {
+          const packageData = {
+            userID: socket.userId,
+            email: session.user.userName,
+            channelID: savedChannel.channelID,
+          };
+          console.log(packageData);
+
+          io.to(`${user._id}`).emit("friendRequestAccepted", packageData);
+          console.log(result);
+          console.log(result);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+
+      // io.to(`${user._id}`)
+      //   .to(socket.userId)
+      //   .emit("friendRequestAccepted", package);
     } catch (error) {
       console.log("Error creating channel:", error);
     }
@@ -540,6 +608,13 @@ io.on("connection", (socket) => {
     socket.join(room);
 
     console.log("joined => " + room);
+  });
+
+  socket.on("leaveRoom", (currentRoom, callback) => {
+    // Perform necessary operations to leave the current room
+    socket.leave(currentRoom);
+    // Acknowledge the event and call the callback function
+    callback();
   });
 
   socket.on("disconnect", () => {
@@ -618,7 +693,7 @@ app.use((err, req, res, next) => {
 app.post("/getMessages", async (req, res) => {
   const { roomID } = req.body;
   console.log(roomID);
-  res.json("hello");
+  res.json("messages");
 });
 
 app.get(
@@ -652,7 +727,7 @@ const redis = new Redis();
 
 async function main() {
   // set an array in Redis
-  await redis.lpush("myArray", "element1", "element2", "element3");
+  await redis.lpush("myArray", "element1");
 
   // get the array from Redis
   const myArray = await redis.lrange("myArray", 0, -1);

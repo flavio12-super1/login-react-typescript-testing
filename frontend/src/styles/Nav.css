@@ -16,10 +16,16 @@
   justify-content: center;
   margin-bottom: 5px;
 }
+.navSettingsStyle {
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  margin-bottom: 5px;
+}
 
 .divImg {
   height: 58.33px;
-  width: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
