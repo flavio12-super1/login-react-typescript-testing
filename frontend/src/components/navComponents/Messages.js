@@ -226,7 +226,7 @@ function Messages() {
             </div>
           ) : (
             <div>
-              no channel selected
+              no channel selected : (
               <Groups />
             </div>
           )}
