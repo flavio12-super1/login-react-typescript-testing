@@ -26,7 +26,6 @@ import {
   RenderElementProps,
 } from "slate-react";
 
-import { Portal } from "./components";
 import { MentionElement } from "./custom-types";
 
 const Groups = () => {
@@ -45,9 +44,12 @@ const Groups = () => {
     c.toLowerCase().startsWith(search.toLowerCase())
   ).slice(0, 10);
 
+  //this code allows you to select a mention from the popup
   const onKeyDown = useCallback(
     (event: any) => {
       if (target && chars.length > 0) {
+        console.log("searching mention");
+        // console.log(chars);
         switch (event.key) {
           case "ArrowDown":
             event.preventDefault();
@@ -77,7 +79,12 @@ const Groups = () => {
   );
 
   useEffect(() => {
+    console.log(chars);
+  }, [chars, target]);
+
+  useEffect(() => {
     if (target && chars.length > 0) {
+      console.log("searching...");
       const el = ref.current;
       const domRange = ReactEditor.toDOMRange(editor, target);
       const rect = domRange.getBoundingClientRect();
@@ -96,10 +103,13 @@ const Groups = () => {
         const { selection } = editor;
 
         if (selection && Range.isCollapsed(selection)) {
+          console.log("selected");
+
           const [start] = Range.edges(selection);
           const wordBefore = Editor.before(editor, start, { unit: "word" });
           const before = wordBefore && Editor.before(editor, wordBefore);
           const beforeRange = before && Editor.range(editor, before, start);
+
           const beforeText = beforeRange && Editor.string(editor, beforeRange);
           const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/);
           const after = Editor.after(editor, start);
@@ -108,7 +118,9 @@ const Groups = () => {
           const afterMatch = afterText.match(/^(\s|$)/);
 
           if (beforeMatch && afterMatch) {
+            console.log("setting target and search");
             setTarget(beforeRange);
+            //this sets the search depeting on what you typed in
             setSearch(beforeMatch[1]);
             setIndex(0);
             return;
@@ -124,42 +136,41 @@ const Groups = () => {
         onKeyDown={onKeyDown}
         placeholder="Enter some text..."
       />
-      {target && chars.length > 0 && (
-        <Portal>
-          <div
-            ref={ref}
-            style={{
-              top: "-9999px",
-              left: "-9999px",
-              position: "absolute",
-              zIndex: 1,
-              padding: "3px",
-              background: "white",
-              borderRadius: "4px",
-              boxShadow: "0 1px 5px rgba(0,0,0,.2)",
-            }}
-            data-cy="mentions-portal"
-          >
-            {chars.map((char, i) => (
-              <div
-                key={char}
-                onClick={() => {
-                  Transforms.select(editor, target);
-                  insertMention(editor, char);
-                  setTarget(null);
-                }}
-                style={{
-                  padding: "1px 3px",
-                  borderRadius: "3px",
-                  background: i === index ? "#B4D5FF" : "transparent",
-                }}
-              >
-                {char}
-              </div>
-            ))}
-          </div>
-        </Portal>
-      )}
+      {target && chars.length > 0 ? (
+        <div
+          ref={ref}
+          style={{
+            top: "-9999px",
+            left: "-9999px",
+            position: "absolute",
+            zIndex: 1,
+            padding: "3px",
+            background: "white",
+            borderRadius: "4px",
+            boxShadow: "0 1px 5px rgba(0,0,0,.2)",
+          }}
+          data-cy="mentions-portal"
+        >
+          {chars.map((char, i) => (
+            <div
+              key={char}
+              onClick={() => {
+                Transforms.select(editor, target);
+                insertMention(editor, char);
+                setTarget(null);
+              }}
+              style={{
+                padding: "1px 3px",
+                borderRadius: "3px",
+                background: i === index ? "#B4D5FF" : "transparent",
+                color: "black",
+              }}
+            >
+              {char}
+            </div>
+          ))}
+        </div>
+      ) : null}
     </Slate>
   );
 };
@@ -403,7 +414,7 @@ const CHARACTERS = [
   "Darth Maul",
   "Darth Tyranus",
   "Daultay Dofine",
-  "dkravec",
+  "dkravec#4998",
   "Del Meeko",
   "Delian Mors",
   "Dengar",
