@@ -12,6 +12,9 @@ import eyecross from "../lurker-icons/eyecross.png";
 import trash from "../lurker-icons/trash.png";
 
 import Groups from "./Groups";
+import FileUploades from "./FileUploades";
+import Drag from "./Drag";
+
 import SlateInput from "./SlateInput";
 export const EventContext = createContext();
 
@@ -228,6 +231,7 @@ function Messages() {
             <div>
               no channel selected : (
               <Groups />
+              <FileUploades />
             </div>
           )}
           {/* <div>my messages!!</div>

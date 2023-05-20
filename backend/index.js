@@ -314,6 +314,43 @@ app.post("/mySearch", verifyJWT, async (req, res) => {
   }
 });
 
+//for file uploads
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const { uploadFile, getObjectSignedUrl } = require("./s3");
+const upload = multer({ storage: storage });
+
+const generateFileName = (bytes = 32) =>
+  crypto.randomBytes(bytes).toString("hex");
+
+upload.single("image");
+const sharp = require("sharp");
+
+app.post("/api/posts", upload.single("image"), async (req, res) => {
+  const file = req.file;
+
+  // Check if the file is a Blob URL
+  const isBlobURL = file.mimetype === "application/octet-stream";
+
+  let fileBuffer;
+  if (isBlobURL) {
+    // If the file is a Blob URL, read the file data from the Blob object
+    fileBuffer = file.buffer;
+  } else {
+    // If the file is a regular file, perform resizing and convert to buffer
+    fileBuffer = await sharp(file.buffer)
+      .resize({ height: 1080, width: 1080, fit: "contain" })
+      .toBuffer();
+  }
+
+  const imageName = generateFileName();
+  await uploadFile(fileBuffer, imageName, file.mimetype);
+
+  let imageUrl = await getObjectSignedUrl(imageName);
+  console.log(imageUrl);
+  res.send(imageUrl);
+});
+
 // You can use Socket.IO to ensure real-time updates between the server and clients. Initialize Socket.IO server and configure it as middleware:
 
 const io = require("socket.io")(server);
