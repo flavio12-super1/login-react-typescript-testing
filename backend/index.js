@@ -290,7 +290,7 @@ app.get("/getUser", verifyJWT, async (req, res) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     console.log("user exists");
-    res.status(201).json({ message: "success" });
+    res.status(201).json({ message: "success", theme: existingUser.theme });
   } else {
     console.log("user does not exist");
     res.status(409).json({ message: "error" });
@@ -423,8 +423,10 @@ io.on("connection", (socket) => {
     console.log(data.message);
     const dataObject = {
       username: session.user.userName,
+      images: data.images,
       message: data.message,
     };
+    console.log(dataObject);
     io.sockets.in(data.channelID).emit("message", dataObject);
   });
 
@@ -731,6 +733,37 @@ app.post("/getMessages", async (req, res) => {
   const { roomID } = req.body;
   console.log(roomID);
   res.json("messages");
+});
+
+//saving user profile themes
+app.post("/saveEdits", verifyJWT, async (req, res) => {
+  const selectedTheme = req.body; // Assuming the selected theme is sent from the frontend
+
+  // Update the profileTheme array in the session
+  req.session.profileTheme = req.session.profileTheme || []; // Initialize the array if it doesn't exist
+  req.session.profileTheme.push(selectedTheme);
+  const userId = req.userId; // Assuming you have the user's ID in the session
+  try {
+    // Update the user's document in the database with the selected theme
+
+    console.log(userId);
+
+    const user = await User.findOne({ _id: userId });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Update the theme field in the user's document
+    user.theme = selectedTheme;
+
+    // Save the updated user document
+    await user.save();
+
+    res.send("success");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error saving user");
+  }
 });
 
 app.get(

@@ -158,6 +158,7 @@ function SlateInput(props: any) {
         focus: Editor.end(editor, []),
       },
     });
+    setFiles([]);
     props.onMessageSubmit(x.children);
   }
 
@@ -181,7 +182,7 @@ function SlateInput(props: any) {
   };
 
   const userData = useContext(EventContext);
-  const { room } = userData;
+  const { room, setFiles } = userData;
 
   useEffect(() => {
     console.log("focus");

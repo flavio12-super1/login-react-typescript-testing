@@ -19,6 +19,8 @@ import Explore from "./components/navComponents/Explore";
 import Channels from "./components/navComponents/Channels";
 import Messages from "./components/navComponents/Messages";
 
+import Testing from "./components/navComponents/Testing";
+
 const socket = io({
   auth: {
     token: localStorage.getItem("token"),
@@ -89,6 +91,10 @@ function App() {
           <Route
             path="/lurker/channel/messages/:channelID"
             element={<Lurker page={<Messages />} />}
+          />
+          <Route
+            path="/lurker/channel/groups/"
+            element={<Lurker page={<Testing />} />}
           />
         </Routes>
       </SocketContext.Provider>

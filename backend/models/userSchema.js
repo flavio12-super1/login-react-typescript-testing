@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+const themeSchema = new mongoose.Schema({
+  bc: { type: Object },
+});
+
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true },
@@ -29,6 +33,7 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    theme: { type: themeSchema },
   },
   { strict: true }
 );

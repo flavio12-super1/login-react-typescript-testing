@@ -1,7 +1,159 @@
+#profilePage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 5px;
+}
 #profileOuterDiv {
   background-color: #2a273e;
   color: white;
 }
 #banner {
   width: 500px;
+}
+#profileImageDivOuter {
+  display: flex;
+  width: auto;
+  justify-content: space-between;
+  padding: 25px;
+}
+#profileImageDiv {
+  position: relative;
+}
+#profileImage {
+  width: 130px;
+  position: absolute;
+  top: -100px;
+  border-radius: 50%;
+  border: solid #1c1826;
+}
+
+#editProfileBtn {
+  border: solid #1c1826;
+  padding: 5px;
+  border-radius: 25px;
+  background-color: black;
+  cursor: pointer;
+}
+.profileElement {
+  padding: 25px;
+  padding-top: 0px;
+}
+#usernameDiv {
+  border-left: solid white;
+  font-size: 22px;
+  padding-left: 5px;
+  color: #7ffffa;
+}
+#userBioDiv {
+  font-size: 18px;
+}
+.countElement {
+  display: flex;
+}
+.innerCountElement {
+  margin-right: 5px;
+  display: flex;
+  border-bottom: solid transparent;
+}
+.word {
+  color: #93c0ff;
+}
+.count {
+  margin-right: 5px;
+}
+.innerCountElement:hover {
+  border-bottom: solid;
+}
+
+#media {
+  margin: 25px;
+  margin-top: 0px;
+  border-top: solid #d3b634;
+  padding-top: 5px;
+}
+
+#ActionButtonsConatiner {
+  height: 25px;
+  border-bottom: solid;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+#cross {
+  margin: 15px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+}
+
+#saveBtn {
+  background-color: green;
+  height: 30px;
+  border-radius: 25px;
+  width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  user-select: none;
+  cursor: pointer;
+}
+
+#profileEditContainer {
+  display: flex;
+  height: -webkit-fill-available;
+}
+
+#previewOuterContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+#userEditsContainer {
+  flex-grow: 1;
+  background-color: #2b273f;
+  margin-right: 25px;
+  padding: 10px;
+}
+
+#previewContainer {
+  flex-grow: 1;
+  flex-basis: 0;
+  display: flex;
+  background-color: #1c1826;
+  /* width: fit-content; */
+  border: solid;
+  /* height: -webkit-fill-available; */
+  padding: 150px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: fit-content;
+}
+#preview {
+  width: fit-content;
+  background-color: #2a273e;
+  /* height: -webkit-fill-available; */
+  /* flex-grow: 1; */
+}
+
+/* user settings */
+.settingsOptionOuterDiv {
+  align-items: center;
+  display: flex;
+  height: 50px;
+  background: linear-gradient(to right, #0000008a, #0000002b);
+  padding-left: 5px;
+}
+.settingsOptionInnerDiv {
+  font-size: 24px;
+  margin-right: 10px;
+}
+.editDivider {
+  height: 4px;
+  background: linear-gradient(90deg, #000000cf, #0000008c);
+  margin-bottom: 10px;
 }

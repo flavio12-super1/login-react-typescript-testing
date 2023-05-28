@@ -112,24 +112,63 @@ input:focus {
   display: flex;
   flex-direction: column;
 }
+/* #chatDiv {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+} */
+
 #chatMessagesDiv {
   flex-grow: 1;
-  /* overflow-y: scroll; */
   padding: 5px;
+  padding-bottom: 0px;
+  overflow-y: scroll;
+  flex-basis: 0px;
 }
+/* #chatMessagesDiv {
+  flex-basis: 0px;
+  flex-grow: 1;
+  overflow: scroll;
+  padding: 5px;
+  height: 100%;
+  display: flex;
+  position: relative;
+} */
+/* #innerChatMessagesDiv {
+  overflow: scroll;
+  flex-grow: 1;
+  max-height: fit-content;
+  flex-shrink: 1;
+} */
 .messageDiv {
   white-space: break-spaces;
 }
 
+#inputOuterContainer {
+  display: flex;
+  margin: 5px;
+  margin-top: 0px;
+  max-height: 300px;
+  overflow: auto;
+}
+#imgButtonDiv {
+  background-color: #0f0e3c;
+  padding-top: 5px;
+  position: absolute;
+  right: 16px;
+}
+
 #outerSlateDiv {
   /* flex-basis: 53px; */
-  min-height: 53px;
-  border-top: solid;
+  /* min-height: 53px; */
+  border-top: solid black;
   background-color: #0d3777;
   display: flex;
+  border-radius: 0px 0px 11px 0px;
 }
 #outerTxtInput {
-  margin: 5px;
+  /* margin: 5px; */
   padding: 5px;
   /* height: -webkit-fill-available; */
   width: -webkit-fill-available;
@@ -137,6 +176,7 @@ input:focus {
   align-items: center;
   font-size: 24px;
   display: flex;
+  /* margin-top: 0px; */
 }
 
 /* #txtInput {
@@ -154,4 +194,64 @@ input:focus {
 }
 ::placeholder {
   color: white;
+}
+
+#imageContainer {
+  margin: 5px;
+  margin-bottom: 0px;
+  background-color: #1f195d;
+  display: flex;
+}
+.innerImageContainer {
+  /* border: dotted black; */
+  height: 200px;
+  width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 5px;
+  margin-right: 0px;
+}
+
+#input[type="file"] {
+  display: none;
+}
+.image-upload {
+  cursor: pointer;
+}
+
+.messageContainer {
+  background-color: #273070;
+  margin-bottom: 5px;
+  border: solid black;
+  padding: 5px;
+}
+.username {
+  color: #3db6c0;
+  font-size: 18px;
+  font-weight: 800;
+}
+.myImage {
+  max-width: 200px;
+  display: block;
+}
+
+/* custom scroll bar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #202048;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #ab9dff;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: white;
 }
