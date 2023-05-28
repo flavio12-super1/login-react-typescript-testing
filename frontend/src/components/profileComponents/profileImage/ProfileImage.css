@@ -1,0 +1,30 @@
+.smallIcon-container {
+  border: solid black;
+  padding: 5px;
+  border-radius: 25px;
+  background-color: white;
+  cursor: pointer;
+}
+.smallIcon {
+  border: solid 1px black;
+  border-radius: 50%;
+}
+.custom-icon-style {
+  line-height: normal;
+  color: black;
+  margin-right: 10px;
+}
+
+.userProfileImageDiv {
+  height: 150px;
+  width: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+  margin: 30px;
+}
+.userProfileImage {
+  max-height: 100%;
+  max-width: 100%;
+}

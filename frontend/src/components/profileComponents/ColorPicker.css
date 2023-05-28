@@ -34,8 +34,8 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   /* padding: 10px; */
   position: absolute;
-  top: 0;
-  left: 80px;
+  top: 45px;
+  right: 0px;
   padding: 0px;
   border-radius: 25px;
   overflow: hidden;

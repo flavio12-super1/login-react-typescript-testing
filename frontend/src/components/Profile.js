@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import axiosInstance from "../config/axiosConfig";
 import { UserContext } from "./Lurker";
 import ColorPicker from "./profileComponents/ColorPicker";
+import ProfileImage from "./profileComponents/profileImage/profileImage";
 import "../styles/Profile.css";
 export const ColorPickerContext = createContext();
 
@@ -110,7 +111,7 @@ function Profile() {
     padding: 20px;
     color: white;
     height: -webkit-fill-available;
-    width: 100%;
+    width: -webkit-fill-available;
     margin: 40px;
     border: solid;
     animation: ${fadeIn} 0.3s ease;
@@ -121,7 +122,7 @@ function Profile() {
 
   const UserEdits = ({ selectedColor, setSelectedColor }) => {
     return (
-      <div>
+      <div id="userEditsInnerContainer">
         <div>
           <div className="settingsOptionOuterDiv">
             <div className="settingsOptionInnerDiv">Background color: </div>
@@ -149,7 +150,9 @@ function Profile() {
         {/* Profile image: */}
         <div>
           <div className="settingsOptionOuterDiv">
-            <div className="settingsOptionInnerDiv">Profile Image: </div>
+            <div className="settingsOptionInnerDiv">
+              <ProfileImage />
+            </div>
           </div>
           <div className="editDivider"></div>
         </div>

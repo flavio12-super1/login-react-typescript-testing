@@ -8,8 +8,14 @@
   background-color: #2a273e;
   color: white;
 }
+/* #banner {
+  width: 50vw;
+  max-width: 750px;
+  min-width: 400px;
+} */
 #banner {
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
 }
 #profileImageDivOuter {
   display: flex;
@@ -44,6 +50,7 @@
   font-size: 22px;
   padding-left: 5px;
   color: #7ffffa;
+  line-break: anywhere;
 }
 #userBioDiv {
   font-size: 18px;
@@ -74,7 +81,7 @@
 }
 
 #ActionButtonsConatiner {
-  height: 25px;
+  min-height: 25px;
   border-bottom: solid;
   margin-bottom: 15px;
   width: 100%;
@@ -103,31 +110,69 @@
   cursor: pointer;
 }
 
-#profileEditContainer {
+/* #profileEditContainer {
   display: flex;
   height: -webkit-fill-available;
+} */
+
+/* #profileEditContainer {
+  display: flex;
+  overflow: auto;
+} */
+
+#profileEditContainer {
+  display: flex;
+  overflow: auto;
+  overflow-x: hidden;
+  /* border: solid red; */
+  width: 100%;
+  box-sizing: border-box;
 }
+
+/* #previewOuterContainer {
+  display: flex;
+  flex-direction: column;
+} */
 
 #previewOuterContainer {
   display: flex;
   flex-direction: column;
+  width: calc(50% - 45px);
 }
 
-#userEditsContainer {
+/* #userEditsContainer {
   flex-grow: 1;
   background-color: #2b273f;
   margin-right: 25px;
   padding: 10px;
+} */
+/* #userEditsContainer {
+  background-color: #2b273f;
+  margin-right: 25px;
+  padding: 10px;
+  flex-basis: 0;
+  flex-grow: 1;
+} */
+#userEditsContainer {
+  background-color: #2b273f;
+  margin-right: 25px;
+  padding: 10px;
+  flex-basis: 0;
+  flex-grow: 1;
+  width: 50%;
 }
 
-#previewContainer {
+#userEditsInnerContainer {
+  height: 100%;
+  overflow-y: scroll;
+}
+
+/* #previewContainer {
   flex-grow: 1;
   flex-basis: 0;
   display: flex;
   background-color: #1c1826;
-  /* width: fit-content; */
   border: solid;
-  /* height: -webkit-fill-available; */
   padding: 150px;
   padding-top: 5px;
   padding-bottom: 5px;
@@ -136,21 +181,38 @@
 #preview {
   width: fit-content;
   background-color: #2a273e;
-  /* height: -webkit-fill-available; */
-  /* flex-grow: 1; */
+} */
+#previewContainer {
+  background-color: #1c1826;
+  border: solid;
+  display: flex;
+  flex-basis: 0;
+  flex-grow: 1;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px;
+}
+#preview {
+  overflow: auto;
+  background-color: #2a273e;
+  max-width: 300px;
+  width: 78%;
 }
 
 /* user settings */
 .settingsOptionOuterDiv {
   align-items: center;
   display: flex;
-  height: 50px;
+  min-height: 50px;
   background: linear-gradient(to right, #0000008a, #0000002b);
   padding-left: 5px;
+  padding-right: 5px;
+  justify-content: space-between;
 }
 .settingsOptionInnerDiv {
   font-size: 24px;
-  margin-right: 10px;
+  width: 100%;
 }
 .editDivider {
   height: 4px;
