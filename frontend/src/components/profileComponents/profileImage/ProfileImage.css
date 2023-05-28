@@ -23,8 +23,23 @@
   justify-content: center;
   background-color: black;
   margin: 30px;
+  position: relative;
+  border: solid black;
+}
+.userProfileImageDiv:hover {
+  border: solid white;
 }
 .userProfileImage {
   max-height: 100%;
   max-width: 100%;
+  display: block;
+}
+.removeImg {
+  position: absolute;
+  top: -17.5px;
+  right: -17.5px;
+  visibility: hidden;
+}
+.userProfileImageDiv:hover .removeImg {
+  visibility: visible;
 }
