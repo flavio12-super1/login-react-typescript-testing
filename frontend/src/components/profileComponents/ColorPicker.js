@@ -13,7 +13,7 @@ const ColorPicker = ({ selectedColor, setSelectedColor }) => {
     // setSelectedColor(color.rgb);
     setSelectedColor((prevState) => ({
       ...prevState,
-      theme: color.rgb,
+      bc: color.rgb,
     }));
   };
 

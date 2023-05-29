@@ -339,7 +339,7 @@ app.post("/api/posts", upload.single("image"), async (req, res) => {
   } else {
     // If the file is a regular file, perform resizing and convert to buffer
     fileBuffer = await sharp(file.buffer)
-      .resize({ height: 1080, width: 1080, fit: "contain" })
+      .resize({ width: 1080, fit: "contain" })
       .toBuffer();
   }
 
@@ -737,8 +737,9 @@ app.post("/getMessages", async (req, res) => {
 
 //saving user profile themes
 app.post("/saveEdits", verifyJWT, async (req, res) => {
-  const selectedTheme = req.body; // Assuming the selected theme is sent from the frontend
+  const { selectedTheme, selectedImage } = req.body; // Assuming the selected theme is sent from the frontend
   console.log(selectedTheme);
+  console.log(selectedTheme.bc);
 
   // Update the profileTheme array in the session
   req.session.profileTheme = req.session.profileTheme || []; // Initialize the array if it doesn't exist
@@ -755,12 +756,22 @@ app.post("/saveEdits", verifyJWT, async (req, res) => {
     }
 
     // Update the theme field in the user's document
-    user.theme = selectedTheme;
+    // user.theme = selectedTheme.bc;
+    // user.theme = { r: 195, g: 46, b: 46, a: 1 };
+    user.theme = {};
+    // user.theme.bc = {
+    //   r: 195,
+    //   g: 46,
+    //   b: 46,
+    //   a: 1,
+    // };
+    user.theme.bc = selectedTheme.bc;
+    user.theme.imageURL = selectedImage;
 
     // Save the updated user document
     await user.save();
-
-    res.json({ theme: selectedTheme });
+    // res.json({ theme: selectedTheme });
+    res.json({ bc: selectedTheme });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error saving user");

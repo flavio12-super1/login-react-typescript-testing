@@ -2,7 +2,15 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const themeSchema = new mongoose.Schema({
-  theme: { type: Object },
+  bc: {
+    r: { type: Number },
+    g: { type: Number },
+    b: { type: Number },
+    a: { type: Number },
+  },
+  imageURL: {
+    type: String,
+  },
 });
 
 const userSchema = new mongoose.Schema(

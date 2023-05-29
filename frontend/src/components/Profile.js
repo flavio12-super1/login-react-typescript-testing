@@ -14,8 +14,17 @@ function Profile() {
   const { socket, myEmail, userID } = userData;
   const { username } = useParams();
   const [user, setUser] = useState(null);
-  const [theme, setTheme] = useState(null);
-  // const [theme, setTheme] = useState({ bc: "", imageURL: "" });
+  // const [theme, setTheme] = useState(null);
+  const [theme, setTheme] = useState({
+    bc: { hex: "#1c1826", alpha: 1 },
+    imageURL:
+      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
+  });
+
+  // const [theme, setTheme] = useState({
+  //   bc: { r: 195, g: 46, b: 46, a: 1 },
+  //   imageURL: "",
+  // });
   const [isLoading, setIsLoading] = useState(true);
 
   const [overlay, setOverlay] = useState(false);
@@ -33,10 +42,23 @@ function Profile() {
       console.log(response.data.message);
       if (response.data.message === "success") {
         console.log("success");
-        console.log(response.data.theme?.theme);
+        // console.log(response.data.theme?.theme);
+        console.log(response.data.theme?.bc);
         setUser(user);
-        setTheme(response.data.theme?.theme);
-        // setTheme({ bc: response.data.theme.bc });
+        // setTheme(response.data.theme?.theme);
+        // setTheme(response.data.theme?.bc);
+        if (response.data.theme?.bc) {
+          setTheme({
+            bc: response.data.theme?.bc,
+            imageURL: response.data.theme?.imageURL,
+          });
+        } else {
+          setTheme({
+            bc: { r: 28, g: 24, b: 38, a: 1 },
+            imageURL:
+              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
+          });
+        }
         return true;
       }
     } catch (error) {
@@ -64,7 +86,7 @@ function Profile() {
   }, [username]);
 
   useEffect(() => {
-    console.log(theme);
+    console.log(theme?.bc.r);
   }, [theme]);
 
   if (isLoading) {
@@ -314,16 +336,16 @@ function Profile() {
     );
   };
 
-  const OverLay = ({ theme }) => {
+  const OverLay = ({ bc }) => {
     // const [selectedColor, setSelectedColor] = useState({
     // bc: {
     //   hex: "#1c1826",
     //   alpha: 1,
     // },
     // });
-    console.log(theme);
+    console.log(bc);
     const [selectedColor, setSelectedColor] = useState({
-      theme,
+      bc,
     });
 
     const initialImages = [
@@ -336,13 +358,18 @@ function Profile() {
     const [images, setImages] = useState(initialImages);
     const [selectedImage, setSelectedImage] = useState(images[0]);
 
-    const saveEdits = () => {
+    const saveEdits = async () => {
       axiosInstance
-        .post("/saveEdits", selectedColor)
+        .post("/saveEdits", {
+          selectedTheme: selectedColor,
+          selectedImage: selectedImage,
+        })
         .then(async (response) => {
-          console.log(response.data.theme);
+          console.log(response.data.bc);
           setOverlay(false);
-          setTheme(response.data.theme.theme);
+          // setTheme(response.data.theme.theme);
+
+          setTheme({ bc: response.data.bc.bc, imageURL: selectedImage });
           // setTheme({ bc: response.data.theme.bc, imageURL: selectedImage });
 
           alert("Saved!");
@@ -361,7 +388,9 @@ function Profile() {
             <div id="userEditsContainer">
               <UserEdits
                 selectedColor={
-                  (selectedColor.theme ??= { bc: { hex: "#1c1826", alpha: 1 } })
+                  (selectedColor.bc ??= {
+                    bc: { hex: "#1c1826", alpha: 1 },
+                  })
                 }
                 // selectedColor={selectedColor.bc}
                 // selectedColor={selectedColor.theme}
@@ -374,7 +403,7 @@ function Profile() {
             </div>
             <div id="previewOuterContainer">
               <Preview
-                selectedColor={selectedColor.theme}
+                selectedColor={selectedColor.bc}
                 // selectedColor={selectedColor.bc}
                 // selectedColor={selectedColor.theme}
                 selectedImage={selectedImage}
@@ -406,8 +435,13 @@ function Profile() {
         <div>
           <div id="profileImageDivOuter">
             <div id="profileImageDiv">
-              <img
+              {/* <img
                 src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png"
+                alt=""
+                id="profileImage"
+              /> */}
+              <div
+                style={{ backgroundImage: `url("${theme.imageURL}")` }}
                 alt=""
                 id="profileImage"
               />
@@ -441,20 +475,20 @@ function Profile() {
           </div>
           <div id="media">No Posts, kinda sus 🤔</div>
         </div>
-        {overlay ? <OverLay theme={theme} /> : null}
-        {/* {overlay ? <OverLay theme={theme.bc} /> : null} */}
+        {/* {overlay ? <OverLay theme={theme} /> : null} */}
+        {overlay ? <OverLay bc={theme.bc} /> : null}
       </div>
     );
   };
 
   return (
     <div
-      style={{
-        backgroundColor: `rgba(${theme?.r}, ${theme?.g}, ${theme?.b}, ${theme?.a})`,
-      }}
       // style={{
-      //   backgroundColor: `rgba(${theme.bc.r}, ${theme.bc.g}, ${theme.bc.b}, ${theme.bc.a})`,
+      //   backgroundColor: `rgba(${theme?.r}, ${theme?.g}, ${theme?.b}, ${theme?.a})`,
       // }}
+      style={{
+        backgroundColor: `rgba(${theme?.bc.r}, ${theme?.bc.g}, ${theme?.bc.b}, ${theme?.bc.a})`,
+      }}
       id="profilePage"
     >
       <div id="profileOuterDiv">
