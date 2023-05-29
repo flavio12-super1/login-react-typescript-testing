@@ -245,11 +245,12 @@ const ColorPicker = ({ selectedColor, setSelectedColor }) => {
 
   const colorPickerRef = useRef(null);
 
+  console.log(selectedColor);
   const handleColorChange = (color) => {
     // setSelectedColor(color.rgb);
     setSelectedColor((prevState) => ({
       ...prevState,
-      bc: color.rgb,
+      theme: color.rgb,
     }));
   };
 
@@ -278,7 +279,7 @@ const ColorPicker = ({ selectedColor, setSelectedColor }) => {
         <div
           className="color-picker-selected-color"
           style={{
-            backgroundColor: `rgba(${selectedColor.r}, ${selectedColor.g}, ${selectedColor.b}, ${selectedColor.a})`,
+            backgroundColor: `rgba(${selectedColor?.r}, ${selectedColor?.g}, ${selectedColor?.b}, ${selectedColor?.a})`,
           }}
         ></div>
       </div>

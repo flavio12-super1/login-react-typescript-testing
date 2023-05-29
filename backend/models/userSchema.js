@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const themeSchema = new mongoose.Schema({
-  bc: { type: Object },
+  theme: { type: Object },
 });
 
 const userSchema = new mongoose.Schema(

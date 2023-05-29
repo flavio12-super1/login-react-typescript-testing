@@ -15,6 +15,7 @@ function Profile() {
   const { username } = useParams();
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState(null);
+  // const [theme, setTheme] = useState({ bc: "", imageURL: "" });
   const [isLoading, setIsLoading] = useState(true);
 
   const [overlay, setOverlay] = useState(false);
@@ -32,9 +33,10 @@ function Profile() {
       console.log(response.data.message);
       if (response.data.message === "success") {
         console.log("success");
-        console.log(response.data.theme);
+        console.log(response.data.theme?.theme);
         setUser(user);
-        setTheme(response.data.theme.bc);
+        setTheme(response.data.theme?.theme);
+        // setTheme({ bc: response.data.theme.bc });
         return true;
       }
     } catch (error) {
@@ -120,7 +122,24 @@ function Profile() {
     flex-direction: column;
   `;
 
-  const UserEdits = ({ selectedColor, setSelectedColor }) => {
+  const UserEdits = ({
+    selectedColor,
+    setSelectedColor,
+    images,
+    setImages,
+    selectedImage,
+    setSelectedImage,
+  }) => {
+    // const initialImages = [
+    //   "https://i.pinimg.com/originals/d4/e0/13/d4e01341b8f4bdc193671689aaec2bbb.jpg",
+    //   "https://i.kym-cdn.com/entries/icons/facebook/000/035/767/cover4.jpg",
+    //   "https://i.ytimg.com/vi/UiCPytVT4bo/maxresdefault.jpg",
+    //   "https://yt3.googleusercontent.com/JVTJHpdwc5AR6ntZu96w-K0M44uLx93RUnUfSFaSMb-BL6cyw4T6ipXJOIpKNbBUQV0fdju7=s900-c-k-c0x00ffffff-no-rj",
+    // ];
+
+    // const [images, setImages] = useState(initialImages);
+    // const [selectedImage, setSelectedImage] = useState(images[0]);
+
     return (
       <div id="userEditsInnerContainer">
         <div>
@@ -151,7 +170,12 @@ function Profile() {
         <div>
           <div className="settingsOptionOuterDiv">
             <div className="settingsOptionInnerDiv">
-              <ProfileImage />
+              <ProfileImage
+                images={images}
+                setImages={setImages}
+                selectedImage={selectedImage}
+                setSelectedImage={setSelectedImage}
+              />
             </div>
           </div>
           <div className="editDivider"></div>
@@ -209,12 +233,12 @@ function Profile() {
     );
   };
 
-  const Preview = ({ selectedColor }) => {
+  const Preview = ({ selectedColor, selectedImage }) => {
     return (
       <div
         id="previewContainer"
         style={{
-          backgroundColor: `rgba(${selectedColor.r}, ${selectedColor.g}, ${selectedColor.b}, ${selectedColor.a})`,
+          backgroundColor: `rgba(${selectedColor?.r}, ${selectedColor?.g}, ${selectedColor?.b}, ${selectedColor?.a})`,
         }}
       >
         <div id="preview">
@@ -227,10 +251,10 @@ function Profile() {
           <div>
             <div id="profileImageDivOuter">
               <div id="profileImageDiv">
-                <img
-                  src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png"
-                  alt=""
+                <div
+                  alt="image"
                   id="profileImage"
+                  style={{ backgroundImage: `url("${selectedImage}")` }}
                 />
               </div>
               <div id="editProfileBtn">follow</div>
@@ -300,19 +324,37 @@ function Profile() {
     );
   };
 
-  const OverLay = () => {
+  const OverLay = ({ theme }) => {
+    // const [selectedColor, setSelectedColor] = useState({
+    // bc: {
+    //   hex: "#1c1826",
+    //   alpha: 1,
+    // },
+    // });
+    console.log(theme);
     const [selectedColor, setSelectedColor] = useState({
-      bc: {
-        hex: "#1c1826",
-        alpha: 1,
-      },
+      theme,
     });
+
+    const initialImages = [
+      "https://i.pinimg.com/originals/d4/e0/13/d4e01341b8f4bdc193671689aaec2bbb.jpg",
+      "https://i.kym-cdn.com/entries/icons/facebook/000/035/767/cover4.jpg",
+      "https://i.ytimg.com/vi/UiCPytVT4bo/maxresdefault.jpg",
+      "https://yt3.googleusercontent.com/JVTJHpdwc5AR6ntZu96w-K0M44uLx93RUnUfSFaSMb-BL6cyw4T6ipXJOIpKNbBUQV0fdju7=s900-c-k-c0x00ffffff-no-rj",
+    ];
+
+    const [images, setImages] = useState(initialImages);
+    const [selectedImage, setSelectedImage] = useState(images[0]);
 
     const saveEdits = () => {
       axiosInstance
         .post("/saveEdits", selectedColor)
         .then(async (response) => {
-          console.log(response.data);
+          console.log(response.data.theme);
+          setOverlay(false);
+          setTheme(response.data.theme.theme);
+          // setTheme({ bc: response.data.theme.bc, imageURL: selectedImage });
+
           alert("Saved!");
         })
         .catch((error) => {
@@ -328,12 +370,25 @@ function Profile() {
           <div id="profileEditContainer">
             <div id="userEditsContainer">
               <UserEdits
-                selectedColor={selectedColor.bc}
+                selectedColor={
+                  (selectedColor.theme ??= { bc: { hex: "#1c1826", alpha: 1 } })
+                }
+                // selectedColor={selectedColor.bc}
+                // selectedColor={selectedColor.theme}
                 setSelectedColor={setSelectedColor}
+                images={images}
+                setImages={setImages}
+                selectedImage={selectedImage}
+                setSelectedImage={setSelectedImage}
               />
             </div>
             <div id="previewOuterContainer">
-              <Preview selectedColor={selectedColor.bc} />
+              <Preview
+                selectedColor={selectedColor.theme}
+                // selectedColor={selectedColor.bc}
+                // selectedColor={selectedColor.theme}
+                selectedImage={selectedImage}
+              />
             </div>
           </div>
         </OverlayContent>
@@ -396,7 +451,8 @@ function Profile() {
           </div>
           <div id="media">No Posts, kinda sus 🤔</div>
         </div>
-        {overlay ? <OverLay /> : null}
+        {overlay ? <OverLay theme={theme} /> : null}
+        {/* {overlay ? <OverLay theme={theme.bc} /> : null} */}
       </div>
     );
   };
@@ -404,8 +460,11 @@ function Profile() {
   return (
     <div
       style={{
-        backgroundColor: `rgba(${theme.r}, ${theme.g}, ${theme.b}, ${theme.a})`,
+        backgroundColor: `rgba(${theme?.r}, ${theme?.g}, ${theme?.b}, ${theme?.a})`,
       }}
+      // style={{
+      //   backgroundColor: `rgba(${theme.bc.r}, ${theme.bc.g}, ${theme.bc.b}, ${theme.bc.a})`,
+      // }}
       id="profilePage"
     >
       <div id="profileOuterDiv">

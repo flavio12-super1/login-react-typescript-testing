@@ -42,7 +42,7 @@ async function getNotificaitons(notifications) {
 }
 
 async function getFriends(friends) {
-  const promises = friends.map((friend) => {
+  const promises = friends?.map((friend) => {
     return User.findById(friend.userID).select("email").lean().exec();
   });
   const results = await Promise.all(promises);
@@ -63,7 +63,7 @@ router.get("/", async (req, res, next) => {
     const user = await User.findById(req.userId);
     const notifications = user.notifications;
     const friends = user.friendList;
-    console.log("friends channel id: " + friends[0].channelID);
+    console.log("friends channel id: " + friends[0]?.channelID);
 
     const notificationsWithUsername = await getNotificaitons(notifications);
     const friendsWithUsername = await getFriends(friends);

@@ -738,6 +738,7 @@ app.post("/getMessages", async (req, res) => {
 //saving user profile themes
 app.post("/saveEdits", verifyJWT, async (req, res) => {
   const selectedTheme = req.body; // Assuming the selected theme is sent from the frontend
+  console.log(selectedTheme);
 
   // Update the profileTheme array in the session
   req.session.profileTheme = req.session.profileTheme || []; // Initialize the array if it doesn't exist
@@ -759,7 +760,7 @@ app.post("/saveEdits", verifyJWT, async (req, res) => {
     // Save the updated user document
     await user.save();
 
-    res.send("success");
+    res.json({ theme: selectedTheme });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error saving user");
