@@ -1,3 +1,66 @@
+import React, { useContext, useEffect, useState, useRef } from "react";
+import { ChromePicker } from "react-color";
+import { ColorPickerContext } from "../Profile.js";
+import "./ColorPicker.css";
+
+const ColorPicker = ({ selectedColor, setSelectedColor }) => {
+  const [showPicker, setShowPicker] = useState(false);
+
+  const colorPickerRef = useRef(null);
+
+  console.log(selectedColor);
+  const handleColorChange = (color) => {
+    // setSelectedColor(color.rgb);
+    setSelectedColor((prevState) => ({
+      ...prevState,
+      theme: color.rgb,
+    }));
+  };
+
+  const handleClickOutside = (e) => {
+    if (colorPickerRef.current && !colorPickerRef.current.contains(e.target)) {
+      setShowPicker(false);
+    }
+  };
+
+  // Attach click event listener to handle clicks outside the color picker
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  const handleColorPickerClick = () => {
+    setShowPicker(!showPicker);
+  };
+
+  return (
+    <div ref={colorPickerRef} id="colorPickerContainer">
+      <div className="color-picker-input" onClick={handleColorPickerClick}>
+        <span className="material-icons">format_paint</span>
+        <div
+          className="color-picker-selected-color"
+          style={{
+            backgroundColor: `rgba(${selectedColor?.r}, ${selectedColor?.g}, ${selectedColor?.b}, ${selectedColor?.a})`,
+          }}
+        ></div>
+      </div>
+
+      {showPicker && (
+        <div className="color-picker-popup">
+          <ChromePicker
+            color={selectedColor}
+            onChange={handleColorChange}
+            disableAlpha={false}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ColorPicker;
 // import React, { useState } from "react";
 
 // const ColorPicker = () => {
@@ -234,67 +297,3 @@
 //     hex: "#000000",
 //     alpha: 1,
 //   });
-
-import React, { useContext, useEffect, useState, useRef } from "react";
-import { ChromePicker } from "react-color";
-import { ColorPickerContext } from "../Profile.js";
-import "./ColorPicker.css";
-
-const ColorPicker = ({ selectedColor, setSelectedColor }) => {
-  const [showPicker, setShowPicker] = useState(false);
-
-  const colorPickerRef = useRef(null);
-
-  console.log(selectedColor);
-  const handleColorChange = (color) => {
-    // setSelectedColor(color.rgb);
-    setSelectedColor((prevState) => ({
-      ...prevState,
-      theme: color.rgb,
-    }));
-  };
-
-  const handleClickOutside = (e) => {
-    if (colorPickerRef.current && !colorPickerRef.current.contains(e.target)) {
-      setShowPicker(false);
-    }
-  };
-
-  // Attach click event listener to handle clicks outside the color picker
-  useEffect(() => {
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
-
-  const handleColorPickerClick = () => {
-    setShowPicker(!showPicker);
-  };
-
-  return (
-    <div ref={colorPickerRef} id="colorPickerContainer">
-      <div className="color-picker-input" onClick={handleColorPickerClick}>
-        <span className="material-icons">format_paint</span>
-        <div
-          className="color-picker-selected-color"
-          style={{
-            backgroundColor: `rgba(${selectedColor?.r}, ${selectedColor?.g}, ${selectedColor?.b}, ${selectedColor?.a})`,
-          }}
-        ></div>
-      </div>
-
-      {showPicker && (
-        <div className="color-picker-popup">
-          <ChromePicker
-            color={selectedColor}
-            onChange={handleColorChange}
-            disableAlpha={false}
-          />
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default ColorPicker;

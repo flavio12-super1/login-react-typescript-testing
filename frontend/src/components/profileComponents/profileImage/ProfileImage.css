@@ -42,9 +42,6 @@
 .selectedImage:hover {
   border: solid blue;
 }
-/* .userProfileImageDiv:hover {
-  border: solid white;
-} */
 .userProfileImage {
   max-height: 150px;
   max-width: 150px;
