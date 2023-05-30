@@ -8,6 +8,12 @@ const themeSchema = new mongoose.Schema({
     b: { type: Number },
     a: { type: Number },
   },
+  fg: {
+    r: { type: Number },
+    g: { type: Number },
+    b: { type: Number },
+    a: { type: Number },
+  },
   imageURL: {
     type: String,
   },

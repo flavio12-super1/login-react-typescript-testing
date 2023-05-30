@@ -40,20 +40,40 @@ function Profile() {
         console.log("success");
         console.log(response.data.theme?.bc);
         setUser(user);
-        if (response.data.theme?.bc) {
-          setTheme({
-            bc: response.data.theme?.bc,
-            imageURL: response.data.theme?.imageURL,
-            imageURLArray: response.data.theme?.imageURLArray,
-          });
-        } else {
-          setTheme({
-            bc: { r: 28, g: 24, b: 38, a: 1 },
-            imageURL:
-              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
-            imageURLArray: [],
-          });
-        }
+        // if (response.data.theme?.bc) {
+        //   setTheme({
+        //     bc: response.data.theme?.bc,
+        //     fg: response.data.theme?.fg ??= { r: 42, g: 39, b: 62, a: 1 },
+        //     imageURL: response.data.theme?.imageURL,
+        //     imageURLArray: response.data.theme?.imageURLArray,
+        //   });
+        // } else {
+        //   setTheme({
+        //     bc: { r: 28, g: 24, b: 38, a: 1 },
+        //     fg: { r: 42, g: 39, b: 62, a: 1 },
+        //     imageURL:
+        //       "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
+        //     imageURLArray: [],
+        //   });
+        // }
+        // if (response.data.theme?.bc) {
+        setTheme({
+          bc: response.data.theme?.bc || { r: 28, g: 24, b: 38, a: 1 },
+          fg: response.data.theme?.fg || { r: 42, g: 39, b: 62, a: 1 },
+          imageURL:
+            response.data.theme?.imageURL ||
+            "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
+          imageURLArray: response.data.theme?.imageURLArray || [],
+        });
+        // } else {
+        //   setTheme({
+        //     bc: { r: 28, g: 24, b: 38, a: 1 },
+        //     fg: { r: 42, g: 39, b: 62, a: 1 },
+        //     imageURL:
+        //       "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
+        //     imageURLArray: [],
+        //   });
+        // }
         return true;
       }
     } catch (error) {
@@ -157,6 +177,11 @@ function Profile() {
         <div>
           <div className="settingsOptionOuterDiv">
             <div className="settingsOptionInnerDiv">foreground Color: </div>
+            <ColorPicker
+              tempTheme={tempTheme}
+              colorKey="fg"
+              setTempTheme={setTempTheme}
+            />
           </div>
           <div className="editDivider"></div>
         </div>
@@ -242,7 +267,12 @@ function Profile() {
           backgroundColor: `rgba(${tempTheme?.bc.r}, ${tempTheme?.bc.g}, ${tempTheme?.bc.b}, ${tempTheme?.bc.a})`,
         }}
       >
-        <div id="preview">
+        <div
+          id="preview"
+          style={{
+            backgroundColor: `rgba(${tempTheme?.fg.r}, ${tempTheme?.fg.g}, ${tempTheme?.fg.b}, ${tempTheme?.fg.a})`,
+          }}
+        >
           <div>
             <img
               src="https://www.primemotorz.com/wp-content/uploads/2019/08/secondary-banner-placeholder.jpg"
@@ -373,7 +403,12 @@ function Profile() {
 
   const ProfilePage = () => {
     return (
-      <div id="profileOuterDiv">
+      <div
+        id="profileOuterDiv"
+        style={{
+          backgroundColor: `rgba(${theme?.fg.r}, ${theme?.fg.g}, ${theme?.fg.b}, ${theme?.fg.a})`,
+        }}
+      >
         <div>
           <img
             src="https://www.primemotorz.com/wp-content/uploads/2019/08/secondary-banner-placeholder.jpg"
