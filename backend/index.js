@@ -259,6 +259,30 @@ app.post("/login", loginLimiter, async (req, res) => {
   }
 });
 
+// app.post("/signup", loginLimiter, async (req, res) => {
+//   const { email, password } = req.body;
+//   try {
+//     if (!(validateEmail(email) && validatePassword(password))) {
+//       console.log("invalid or empty fields");
+//       res.status(401).json({ error: "invalid or empty fields" });
+//     } else {
+//       const existingUser = await User.findOne({ email });
+//       if (existingUser) {
+//         console.log("User with this email already exists");
+//         res.status(409).json({ error: "User with this email already exists" });
+//       } else {
+//         const hashedPassword = await bcrypt.hash(password, saltRounds);
+//         const user = new User({ email, password: hashedPassword });
+//         await user.save();
+//         res.status(201).json({ message: "User created" });
+//       }
+//     }
+//   } catch (error) {
+//     // Handle the error appropriately
+//     console.error(error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// });
 app.post("/signup", loginLimiter, async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -272,7 +296,24 @@ app.post("/signup", loginLimiter, async (req, res) => {
         res.status(409).json({ error: "User with this email already exists" });
       } else {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const user = new User({ email, password: hashedPassword });
+
+        const defaultTheme = {
+          bc: { r: 28, g: 24, b: 38, a: 1 },
+          imageURL:
+            "https://i.pinimg.com/originals/d4/e0/13/d4e01341b8f4bdc193671689aaec2bbb.jpg",
+          imageURLArray: [
+            "https://i.pinimg.com/originals/d4/e0/13/d4e01341b8f4bdc193671689aaec2bbb.jpg",
+            "https://i.kym-cdn.com/entries/icons/facebook/000/035/767/cover4.jpg",
+            "https://i.ytimg.com/vi/UiCPytVT4bo/maxresdefault.jpg",
+            "https://yt3.googleusercontent.com/JVTJHpdwc5AR6ntZu96w-K0M44uLx93RUnUfSFaSMb-BL6cyw4T6ipXJOIpKNbBUQV0fdju7=s900-c-k-c0x00ffffff-no-rj",
+          ],
+        };
+
+        const user = new User({
+          email,
+          password: hashedPassword,
+          theme: defaultTheme,
+        });
         await user.save();
         res.status(201).json({ message: "User created" });
       }
@@ -722,6 +763,8 @@ const deleteRoute = require("./routes/deleteRoute");
 app.use("/delete", verifyJWT, deleteRoute);
 const userData = require("./routes/userData");
 app.use("/userData", verifyJWT, userData);
+const saveEdites = require("./routes/saveEdites");
+app.use("/saveEdits", verifyJWT, saveEdites);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -735,48 +778,39 @@ app.post("/getMessages", async (req, res) => {
   res.json("messages");
 });
 
-//saving user profile themes
-app.post("/saveEdits", verifyJWT, async (req, res) => {
-  const { selectedTheme, selectedImage } = req.body; // Assuming the selected theme is sent from the frontend
-  console.log(selectedTheme);
-  console.log(selectedTheme.bc);
+// //saving user profile themes
+// app.post("/saveEdits", verifyJWT, async (req, res) => {
+//   const { selectedTheme, selectedImage } = req.body; // Assuming the selected theme is sent from the frontend
+//   console.log(selectedTheme);
+//   console.log(selectedTheme.bc);
 
-  // Update the profileTheme array in the session
-  req.session.profileTheme = req.session.profileTheme || []; // Initialize the array if it doesn't exist
-  req.session.profileTheme.push(selectedTheme);
-  const userId = req.userId; // Assuming you have the user's ID in the session
-  try {
-    // Update the user's document in the database with the selected theme
+//   // Update the profileTheme array in the session
+//   req.session.profileTheme = req.session.profileTheme || []; // Initialize the array if it doesn't exist
+//   req.session.profileTheme.push(selectedTheme);
+//   const userId = req.userId; // Assuming you have the user's ID in the session
+//   try {
+//     // Update the user's document in the database with the selected theme
 
-    console.log(userId);
+//     console.log(userId);
 
-    const user = await User.findOne({ _id: userId });
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
+//     const user = await User.findOne({ _id: userId });
+//     if (!user) {
+//       return res.status(404).send("User not found");
+//     }
 
-    // Update the theme field in the user's document
-    // user.theme = selectedTheme.bc;
-    // user.theme = { r: 195, g: 46, b: 46, a: 1 };
-    user.theme = {};
-    // user.theme.bc = {
-    //   r: 195,
-    //   g: 46,
-    //   b: 46,
-    //   a: 1,
-    // };
-    user.theme.bc = selectedTheme.bc;
-    user.theme.imageURL = selectedImage;
+//     // Update the theme field in the user's document
+//     user.theme = {};
+//     user.theme.bc = selectedTheme.bc;
+//     user.theme.imageURL = selectedImage;
 
-    // Save the updated user document
-    await user.save();
-    // res.json({ theme: selectedTheme });
-    res.json({ bc: selectedTheme });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error saving user");
-  }
-});
+//     // Save the updated user document
+//     await user.save();
+//     res.json({ bc: selectedTheme });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Error saving user");
+//   }
+// });
 
 app.get(
   "/verify",

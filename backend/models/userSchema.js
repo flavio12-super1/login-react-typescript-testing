@@ -11,6 +11,15 @@ const themeSchema = new mongoose.Schema({
   imageURL: {
     type: String,
   },
+  imageURLArray: {
+    type: [String],
+    default: [
+      "https://i.pinimg.com/originals/d4/e0/13/d4e01341b8f4bdc193671689aaec2bbb.jpg",
+      "https://i.kym-cdn.com/entries/icons/facebook/000/035/767/cover4.jpg",
+      "https://i.ytimg.com/vi/UiCPytVT4bo/maxresdefault.jpg",
+      "https://yt3.googleusercontent.com/JVTJHpdwc5AR6ntZu96w-K0M44uLx93RUnUfSFaSMb-BL6cyw4T6ipXJOIpKNbBUQV0fdju7=s900-c-k-c0x00ffffff-no-rj",
+    ],
+  },
 });
 
 const userSchema = new mongoose.Schema(
@@ -41,7 +50,7 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
-    theme: { type: themeSchema },
+    theme: { type: themeSchema, required: true },
   },
   { strict: true }
 );

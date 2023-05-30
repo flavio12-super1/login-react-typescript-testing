@@ -4,7 +4,6 @@ import "./ProfileImage.css";
 import axiosInstance from "../../../config/axiosConfig";
 
 const ImageArray = ({ images, setImages, selectedImage, setSelectedImage }) => {
-  //   const [selectedImage, setSelectedImage] = useState(images[0]);
   const removeImg = (index) => {
     const updatedImages = [...images];
     updatedImages.splice(index, 1); // Remove the image at the specified index
@@ -139,22 +138,12 @@ function ProfileImage({ images, setImages, selectedImage, setSelectedImage }) {
     });
   };
 
-  //   const handleFileChange = async (event) => {
-  //     const uploadedFiles = Array.from(event.target.files);
-  //     const compressedFiles = await Promise.all(uploadedFiles.map(compressImage));
-  //     const compressedImageUrls = compressedFiles.map((file) =>
-  //       URL.createObjectURL(file)
-  //     );
-  //     setImages((prevImages) => [...compressedImageUrls, ...prevImages]);
-  //     console.log(compressedImageUrls);
-  //   };
   const handleFileChange = async (event) => {
     const uploadedFiles = Array.from(event.target.files);
     const compressedFiles = await Promise.all(uploadedFiles.map(compressImage));
     const compressedImageUrls = compressedFiles.map((file) =>
       URL.createObjectURL(file)
     );
-    // setImages((prevImages) => [...compressedImageUrls, ...prevImages]);
     console.log(compressedImageUrls);
 
     const formData = new FormData();

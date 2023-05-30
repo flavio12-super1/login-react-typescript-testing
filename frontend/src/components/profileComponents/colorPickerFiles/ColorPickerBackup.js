@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { ChromePicker } from "react-color";
-import { ColorPickerContext } from "../Profile.js";
 import "./ColorPicker.css";
 
 const ColorPicker = ({ selectedColor, setSelectedColor }) => {
@@ -10,7 +9,6 @@ const ColorPicker = ({ selectedColor, setSelectedColor }) => {
 
   console.log(selectedColor);
   const handleColorChange = (color) => {
-    // setSelectedColor(color.rgb);
     setSelectedColor((prevState) => ({
       ...prevState,
       bc: color.rgb,

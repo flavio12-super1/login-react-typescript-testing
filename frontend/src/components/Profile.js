@@ -4,8 +4,8 @@ import styled, { keyframes } from "styled-components";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../config/axiosConfig";
 import { UserContext } from "./Lurker";
-import ColorPicker from "./profileComponents/ColorPicker";
-import ProfileImage from "./profileComponents/profileImage/profileImage";
+import ColorPicker from "./profileComponents/colorPickerFiles/ColorPicker";
+import ProfileImage from "./profileComponents/profileImageFiles/ProfileImage";
 import "../styles/Profile.css";
 export const ColorPickerContext = createContext();
 
@@ -14,17 +14,13 @@ function Profile() {
   const { socket, myEmail, userID } = userData;
   const { username } = useParams();
   const [user, setUser] = useState(null);
-  // const [theme, setTheme] = useState(null);
   const [theme, setTheme] = useState({
     bc: { hex: "#1c1826", alpha: 1 },
+    fg: { hex: "#2a273e", alpha: 1 },
     imageURL:
       "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
+    imageURLArray: [],
   });
-
-  // const [theme, setTheme] = useState({
-  //   bc: { r: 195, g: 46, b: 46, a: 1 },
-  //   imageURL: "",
-  // });
   const [isLoading, setIsLoading] = useState(true);
 
   const [overlay, setOverlay] = useState(false);
@@ -42,21 +38,20 @@ function Profile() {
       console.log(response.data.message);
       if (response.data.message === "success") {
         console.log("success");
-        // console.log(response.data.theme?.theme);
         console.log(response.data.theme?.bc);
         setUser(user);
-        // setTheme(response.data.theme?.theme);
-        // setTheme(response.data.theme?.bc);
         if (response.data.theme?.bc) {
           setTheme({
             bc: response.data.theme?.bc,
             imageURL: response.data.theme?.imageURL,
+            imageURLArray: response.data.theme?.imageURLArray,
           });
         } else {
           setTheme({
             bc: { r: 28, g: 24, b: 38, a: 1 },
             imageURL:
               "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
+            imageURLArray: [],
           });
         }
         return true;
@@ -144,22 +139,16 @@ function Profile() {
     flex-direction: column;
   `;
 
-  const UserEdits = ({
-    selectedColor,
-    setSelectedColor,
-    images,
-    setImages,
-    selectedImage,
-    setSelectedImage,
-  }) => {
+  const UserEdits = ({ tempTheme, setTempTheme }) => {
     return (
       <div id="userEditsInnerContainer">
         <div>
           <div className="settingsOptionOuterDiv">
             <div className="settingsOptionInnerDiv">Background color: </div>
             <ColorPicker
-              selectedColor={selectedColor}
-              setSelectedColor={setSelectedColor}
+              tempTheme={tempTheme}
+              colorKey="bc"
+              setTempTheme={setTempTheme}
             />
           </div>
           <div className="editDivider"></div>
@@ -183,10 +172,10 @@ function Profile() {
           <div className="settingsOptionOuterDiv">
             <div className="settingsOptionInnerDiv">
               <ProfileImage
-                images={images}
-                setImages={setImages}
-                selectedImage={selectedImage}
-                setSelectedImage={setSelectedImage}
+                tempTheme={tempTheme}
+                uploadKey="imageURL"
+                uploadListKey="imageURLArray"
+                setTempTheme={setTempTheme}
               />
             </div>
           </div>
@@ -245,12 +234,12 @@ function Profile() {
     );
   };
 
-  const Preview = ({ selectedColor, selectedImage }) => {
+  const Preview = ({ tempTheme }) => {
     return (
       <div
         id="previewContainer"
         style={{
-          backgroundColor: `rgba(${selectedColor?.r}, ${selectedColor?.g}, ${selectedColor?.b}, ${selectedColor?.a})`,
+          backgroundColor: `rgba(${tempTheme?.bc.r}, ${tempTheme?.bc.g}, ${tempTheme?.bc.b}, ${tempTheme?.bc.a})`,
         }}
       >
         <div id="preview">
@@ -266,7 +255,7 @@ function Profile() {
                 <div
                   alt="image"
                   id="profileImage"
-                  style={{ backgroundImage: `url("${selectedImage}")` }}
+                  style={{ backgroundImage: `url("${tempTheme.imageURL}")` }}
                 />
               </div>
               <div id="editProfileBtn">follow</div>
@@ -336,42 +325,19 @@ function Profile() {
     );
   };
 
-  const OverLay = ({ bc }) => {
-    // const [selectedColor, setSelectedColor] = useState({
-    // bc: {
-    //   hex: "#1c1826",
-    //   alpha: 1,
-    // },
-    // });
-    console.log(bc);
-    const [selectedColor, setSelectedColor] = useState({
-      bc,
-    });
-
-    const initialImages = [
-      "https://i.pinimg.com/originals/d4/e0/13/d4e01341b8f4bdc193671689aaec2bbb.jpg",
-      "https://i.kym-cdn.com/entries/icons/facebook/000/035/767/cover4.jpg",
-      "https://i.ytimg.com/vi/UiCPytVT4bo/maxresdefault.jpg",
-      "https://yt3.googleusercontent.com/JVTJHpdwc5AR6ntZu96w-K0M44uLx93RUnUfSFaSMb-BL6cyw4T6ipXJOIpKNbBUQV0fdju7=s900-c-k-c0x00ffffff-no-rj",
-    ];
-
-    const [images, setImages] = useState(initialImages);
-    const [selectedImage, setSelectedImage] = useState(images[0]);
+  const OverLay = ({ theme }) => {
+    console.log(theme);
+    const [tempTheme, setTempTheme] = useState(theme);
 
     const saveEdits = async () => {
       axiosInstance
         .post("/saveEdits", {
-          selectedTheme: selectedColor,
-          selectedImage: selectedImage,
+          theme: tempTheme,
         })
         .then(async (response) => {
-          console.log(response.data.bc);
+          console.log(response.data.theme);
           setOverlay(false);
-          // setTheme(response.data.theme.theme);
-
-          setTheme({ bc: response.data.bc.bc, imageURL: selectedImage });
-          // setTheme({ bc: response.data.theme.bc, imageURL: selectedImage });
-
+          setTheme(response.data.theme);
           alert("Saved!");
         })
         .catch((error) => {
@@ -386,28 +352,10 @@ function Profile() {
           </div>
           <div id="profileEditContainer">
             <div id="userEditsContainer">
-              <UserEdits
-                selectedColor={
-                  (selectedColor.bc ??= {
-                    bc: { hex: "#1c1826", alpha: 1 },
-                  })
-                }
-                // selectedColor={selectedColor.bc}
-                // selectedColor={selectedColor.theme}
-                setSelectedColor={setSelectedColor}
-                images={images}
-                setImages={setImages}
-                selectedImage={selectedImage}
-                setSelectedImage={setSelectedImage}
-              />
+              <UserEdits tempTheme={tempTheme} setTempTheme={setTempTheme} />
             </div>
             <div id="previewOuterContainer">
-              <Preview
-                selectedColor={selectedColor.bc}
-                // selectedColor={selectedColor.bc}
-                // selectedColor={selectedColor.theme}
-                selectedImage={selectedImage}
-              />
+              <Preview tempTheme={tempTheme} />
             </div>
           </div>
         </OverlayContent>
@@ -435,11 +383,6 @@ function Profile() {
         <div>
           <div id="profileImageDivOuter">
             <div id="profileImageDiv">
-              {/* <img
-                src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png"
-                alt=""
-                id="profileImage"
-              /> */}
               <div
                 style={{ backgroundImage: `url("${theme.imageURL}")` }}
                 alt=""
@@ -475,17 +418,13 @@ function Profile() {
           </div>
           <div id="media">No Posts, kinda sus 🤔</div>
         </div>
-        {/* {overlay ? <OverLay theme={theme} /> : null} */}
-        {overlay ? <OverLay bc={theme.bc} /> : null}
+        {overlay ? <OverLay theme={theme} /> : null}
       </div>
     );
   };
 
   return (
     <div
-      // style={{
-      //   backgroundColor: `rgba(${theme?.r}, ${theme?.g}, ${theme?.b}, ${theme?.a})`,
-      // }}
       style={{
         backgroundColor: `rgba(${theme?.bc.r}, ${theme?.bc.g}, ${theme?.bc.b}, ${theme?.bc.a})`,
       }}
