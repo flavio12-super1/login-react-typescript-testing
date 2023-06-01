@@ -19,7 +19,6 @@ import {
 
 import { withHistory, HistoryEditor } from "slate-history";
 import { EventContext } from "./UserBiography";
-import { is } from "immutable";
 
 type CustomElement = { type: "paragraph"; children: CustomText[] };
 type CustomText = { text: string; bold?: true };
@@ -35,7 +34,7 @@ declare module "slate" {
 const initialValue: Descendant[] = [
   {
     type: "paragraph",
-    children: [{ text: "" }],
+    children: [{ text: "This is my Bio" }],
   },
 ];
 
@@ -78,25 +77,42 @@ function SlateInput(props: any) {
   };
 
   const userData = useContext(EventContext);
-  const { showEmojiOverLay } = userData;
+  const { showEmojiOverLay, selectedEmoji, setSelectedEmoji } = userData;
 
-  useEffect(() => {
-    console.log("focus");
-    Transforms.select(editor, { offset: 0, path: [0, 0] });
-  }, [editor]);
+  const insertEmoji = (emoji: string) => {
+    const selection = editor.selection;
+    if (!selection) {
+      return;
+    } // guard against null selection
+
+    const [start] = Editor.edges(editor, selection);
+    Transforms.insertText(editor, emoji, { at: start });
+    setSelectedEmoji("");
+  };
 
   useEffect(() => {
     document.getElementById("txtInput")?.focus();
-  }, [showEmojiOverLay]);
+    console.log("focus");
+  }, [selectedEmoji]);
 
-  // const placeholderValue: string = "Dont be shy 👀";
+  useEffect(() => {
+    console.log(selectedEmoji);
+    if (selectedEmoji && selectedEmoji?.length > 0) insertEmoji(selectedEmoji);
+  }, [selectedEmoji]);
+
+  useEffect(() => {
+    // Move the cursor to the end of the text node
+    const path = Editor.end(editor, []);
+    const range = Editor.range(editor, path);
+    ReactEditor.focus(editor);
+    Transforms.select(editor, range);
+  }, [editor]);
 
   return (
     <div id="outerTxtInput">
       <Slate editor={editor} value={initialValue}>
         <Editable
           spellCheck
-          autoFocus
           placeholder="Dont be shy : )"
           onKeyDown={(event) => handleKeyPress(event)}
           id="txtInput"

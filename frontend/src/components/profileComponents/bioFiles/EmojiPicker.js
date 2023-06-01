@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./EmojiPicker.css";
 
-const EmojiPicker = () => {
+const EmojiPicker = ({ onEmojiSelect }) => {
   const [emojiData] = useState([
     { emoji: "😀", name: "grinning_face" },
     { emoji: "😃", name: "grinning_face_with_big_eyes" },
@@ -44,18 +44,28 @@ const EmojiPicker = () => {
     setFilteredEmojis(filteredEmojis);
   };
 
+  const handleEmojiSelect = (emoji) => {
+    onEmojiSelect(emoji);
+  };
+
   return (
     <div className="emoji-picker">
       <input
         type="text"
         placeholder="Search Emoji by Name"
+        style={{ backgroundColor: "#181624" }}
         value={searchTerm}
         onChange={handleSearch}
       />
 
       <div className="emoji-container">
         {filteredEmojis.map((emoji, index) => (
-          <div className="emoji" key={index} title={emoji.name}>
+          <div
+            className="emoji"
+            key={index}
+            title={emoji.name}
+            onClick={() => handleEmojiSelect(emoji.emoji)}
+          >
             {emoji.emoji}
           </div>
         ))}
