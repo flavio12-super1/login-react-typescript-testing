@@ -299,6 +299,12 @@ app.post("/signup", loginLimiter, async (req, res) => {
 
         const defaultTheme = {
           bc: { r: 28, g: 24, b: 38, a: 1 },
+          fg: { r: 42, g: 39, b: 62, a: 1 },
+          bannerURL:
+            "https://www.primemotorz.com/wp-content/uploads/2019/08/secondary-banner-placeholder.jpg",
+          bannerArray: [
+            "https://www.primemotorz.com/wp-content/uploads/2019/08/secondary-banner-placeholder.jpg",
+          ],
           imageURL:
             "https://i.pinimg.com/originals/d4/e0/13/d4e01341b8f4bdc193671689aaec2bbb.jpg",
           imageURLArray: [
@@ -307,6 +313,8 @@ app.post("/signup", loginLimiter, async (req, res) => {
             "https://i.ytimg.com/vi/UiCPytVT4bo/maxresdefault.jpg",
             "https://yt3.googleusercontent.com/JVTJHpdwc5AR6ntZu96w-K0M44uLx93RUnUfSFaSMb-BL6cyw4T6ipXJOIpKNbBUQV0fdju7=s900-c-k-c0x00ffffff-no-rj",
           ],
+          borderColor: { r: 28, g: 24, b: 38, a: 1 },
+          uc: { r: 127, g: 255, b: 250, a: 1 },
         };
 
         const user = new User({

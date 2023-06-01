@@ -1,0 +1,97 @@
+.customIcon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2d4da3;
+}
+.customIconStyle {
+  color: white;
+  font-size: 16px;
+  line-height: normal;
+  margin-right: 0 !important;
+}
+
+#colorPickerContainer {
+  position: relative;
+}
+
+.custom-overlay {
+  background-color: #2a273e;
+  border: solid #000;
+  border-radius: 25px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: #000;
+  height: 266.75px;
+  padding: 0;
+  position: absolute;
+  right: 0;
+  top: 45px;
+  width: 225px;
+  z-index: 999;
+}
+.color-picker-input {
+  cursor: pointer;
+  padding: 5px;
+  width: fit-content;
+  border: solid;
+  border-radius: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  color: black;
+}
+
+#pencil {
+  margin-left: 2px;
+}
+#done {
+  background-color: green;
+}
+#close {
+  margin-left: 5px;
+  background-color: red;
+}
+#emoji {
+  background-image: url("https://em-content.zobj.net/thumbs/160/apple/76/smiling-face-with-smiling-eyes_1f60a.png");
+  height: 110%;
+  width: 110%;
+  background-size: cover;
+  background-position: 50%;
+  cursor: pointer;
+}
+
+#customOverLay {
+  padding: 10px;
+}
+#customOverLayInner {
+  display: flex;
+  justify-content: flex-end;
+  border-bottom: solid #ff0;
+  padding-bottom: 5px;
+  position: relative;
+}
+#customOverLayInnerButtons {
+  display: flex;
+  border: solid;
+  border-radius: 25px;
+  padding: 2px;
+  background-color: #ab9eff;
+}
+
+.custom-emoji-overlay {
+  background-color: #2a273e;
+  border: solid #000;
+  border-radius: 25px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: #000;
+  height: 266.75px;
+  padding: 0;
+  position: absolute;
+  width: 225px;
+  z-index: 999;
+  right: 235px;
+  top: -13px;
+}

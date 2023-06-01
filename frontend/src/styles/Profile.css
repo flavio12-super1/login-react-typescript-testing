@@ -11,7 +11,10 @@
 }
 #banner {
   width: 100%;
-  max-width: 500px;
+  max-width: 550px;
+  height: 150px;
+  background-position: 50%;
+  background-size: cover;
 }
 #profileImageDivOuter {
   display: flex;

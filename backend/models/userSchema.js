@@ -14,6 +14,15 @@ const themeSchema = new mongoose.Schema({
     b: { type: Number },
     a: { type: Number },
   },
+  bannerURL: {
+    type: String,
+  },
+  bannerArray: {
+    type: [String],
+    default: [
+      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
+    ],
+  },
   imageURL: {
     type: String,
   },
@@ -25,6 +34,18 @@ const themeSchema = new mongoose.Schema({
       "https://i.ytimg.com/vi/UiCPytVT4bo/maxresdefault.jpg",
       "https://yt3.googleusercontent.com/JVTJHpdwc5AR6ntZu96w-K0M44uLx93RUnUfSFaSMb-BL6cyw4T6ipXJOIpKNbBUQV0fdju7=s900-c-k-c0x00ffffff-no-rj",
     ],
+  },
+  borderColor: {
+    r: { type: Number },
+    g: { type: Number },
+    b: { type: Number },
+    a: { type: Number },
+  },
+  uc: {
+    r: { type: Number },
+    g: { type: Number },
+    b: { type: Number },
+    a: { type: Number },
   },
 });
 

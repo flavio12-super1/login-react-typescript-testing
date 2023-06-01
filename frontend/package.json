@@ -14,6 +14,7 @@
     "chart.js": "^4.2.1",
     "classnames": "^2.3.2",
     "csvtojson": "^2.0.10",
+    "emoji-mart": "^5.5.2",
     "faker": "^5.5.3",
     "html2canvas": "^1.4.1",
     "install": "^0.13.0",
@@ -32,6 +33,7 @@
     "socket.io-client": "^4.6.1",
     "styled-components": "^5.3.11",
     "typescript": "^4.9.5",
+    "uuid": "^9.0.0",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },

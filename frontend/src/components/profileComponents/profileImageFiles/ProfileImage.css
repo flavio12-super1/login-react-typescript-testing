@@ -12,6 +12,7 @@
   line-height: normal;
   color: black;
   margin-right: 10px;
+  user-select: none;
 }
 
 .userProfileImageDiv {

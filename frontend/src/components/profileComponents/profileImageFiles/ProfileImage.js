@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../../styles/CommonStyles.css";
 import "./ProfileImage.css";
 import axiosInstance from "../../../config/axiosConfig";
+import { v4 as uuidv4 } from "uuid";
 
 const ImageArray = ({ tempTheme, uploadKey, uploadListKey, setTempTheme }) => {
   const removeImg = (index) => {
@@ -68,35 +69,14 @@ const ImageArray = ({ tempTheme, uploadKey, uploadListKey, setTempTheme }) => {
   );
 };
 
-function ProfileImage({ tempTheme, uploadKey, uploadListKey, setTempTheme }) {
-  const [files, setFiles] = useState([]);
-
-  const handleDragOver = (event) => {
-    event.preventDefault();
-  };
-
-  const handleDragStart = (event) => {
-    event.dataTransfer.setData("text/plain", event.target.src);
-  };
-
-  const handleDragEnter = (event) => {
-    event.preventDefault();
-  };
-
-  const handleDragLeave = (event) => {
-    event.preventDefault();
-  };
-
-  const handleDragOverImage = (event) => {
-    event.preventDefault();
-  };
-
-  const handleDropImage = (event) => {
-    event.preventDefault();
-    const imageUrl = event.dataTransfer.getData("text/plain");
-    setFiles((prevFiles) => [...prevFiles, imageUrl]);
-  };
-
+function ProfileImage({
+  tempTheme,
+  text,
+  uploadKey,
+  uploadListKey,
+  setTempTheme,
+}) {
+  const id = uuidv4();
   const compressImage = async (file) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -153,14 +133,17 @@ function ProfileImage({ tempTheme, uploadKey, uploadListKey, setTempTheme }) {
 
     const formData = new FormData();
     compressedFiles.forEach((file) => {
-      formData.append("image", file); // Use compressedFiles instead of files
+      formData.append("image", file); // Use uploadListKey instead of "image"
     });
 
     axiosInstance.post("/api/posts", formData).then((res) => {
       console.log(res.data);
+      const updatedImages = [...tempTheme?.[uploadListKey]];
+      updatedImages.push(res.data); // Add the image to the end of the array
+
       setTempTheme((prevState) => ({
         ...prevState,
-        [uploadListKey]: [...prevState[uploadListKey], res.data],
+        [uploadListKey]: updatedImages,
       }));
     });
   };
@@ -172,12 +155,10 @@ function ProfileImage({ tempTheme, uploadKey, uploadListKey, setTempTheme }) {
   return (
     <div>
       <div className="displayFlex width100 alighnItemsCenter height50">
-        <div className="displayFlex alighnItemsCenter width100">
-          Profile Image:
-        </div>
+        <div className="displayFlex alighnItemsCenter width100">{text}</div>
         <div onClick={() => checkSpace()}>
           <label
-            htmlFor="input"
+            htmlFor={id}
             className="displayFlex alighnItemsCenter smallIcon-container image-upload"
           >
             <span className="material-icons custom-icon-style">
@@ -216,10 +197,10 @@ function ProfileImage({ tempTheme, uploadKey, uploadListKey, setTempTheme }) {
           <input
             type="file"
             name="image-upload"
-            id="input"
+            id={id}
             accept="image/jpeg, image/png"
             style={{ display: "none" }} // Add this style to hide the file input
-            onChange={handleFileChange}
+            onChange={(event) => handleFileChange(event)}
             disabled={tempTheme?.[uploadListKey].length >= 4}
           />
         </div>

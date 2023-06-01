@@ -6,6 +6,7 @@ import axiosInstance from "../config/axiosConfig";
 import { UserContext } from "./Lurker";
 import ColorPicker from "./profileComponents/colorPickerFiles/ColorPicker";
 import ProfileImage from "./profileComponents/profileImageFiles/ProfileImage";
+import UserBiography from "./profileComponents/bioFiles/UserBiography";
 import "../styles/Profile.css";
 export const ColorPickerContext = createContext();
 
@@ -14,13 +15,7 @@ function Profile() {
   const { socket, myEmail, userID } = userData;
   const { username } = useParams();
   const [user, setUser] = useState(null);
-  const [theme, setTheme] = useState({
-    bc: { hex: "#1c1826", alpha: 1 },
-    fg: { hex: "#2a273e", alpha: 1 },
-    imageURL:
-      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
-    imageURLArray: [],
-  });
+  const [theme, setTheme] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const [overlay, setOverlay] = useState(false);
@@ -40,40 +35,25 @@ function Profile() {
         console.log("success");
         console.log(response.data.theme?.bc);
         setUser(user);
-        // if (response.data.theme?.bc) {
-        //   setTheme({
-        //     bc: response.data.theme?.bc,
-        //     fg: response.data.theme?.fg ??= { r: 42, g: 39, b: 62, a: 1 },
-        //     imageURL: response.data.theme?.imageURL,
-        //     imageURLArray: response.data.theme?.imageURLArray,
-        //   });
-        // } else {
-        //   setTheme({
-        //     bc: { r: 28, g: 24, b: 38, a: 1 },
-        //     fg: { r: 42, g: 39, b: 62, a: 1 },
-        //     imageURL:
-        //       "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
-        //     imageURLArray: [],
-        //   });
-        // }
-        // if (response.data.theme?.bc) {
         setTheme({
           bc: response.data.theme?.bc || { r: 28, g: 24, b: 38, a: 1 },
           fg: response.data.theme?.fg || { r: 42, g: 39, b: 62, a: 1 },
+          bannerURL:
+            response.data.theme?.bannerURL ||
+            "https://www.primemotorz.com/wp-content/uploads/2019/08/secondary-banner-placeholder.jpg",
+          bannerArray: response.data.theme?.bannerArray || [],
           imageURL:
             response.data.theme?.imageURL ||
             "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
           imageURLArray: response.data.theme?.imageURLArray || [],
+          borderColor: response.data.theme?.borderColor || {
+            r: 28,
+            g: 24,
+            b: 38,
+            a: 1,
+          },
+          uc: response.data.theme?.uc || { r: 127, g: 255, b: 250, a: 1 },
         });
-        // } else {
-        //   setTheme({
-        //     bc: { r: 28, g: 24, b: 38, a: 1 },
-        //     fg: { r: 42, g: 39, b: 62, a: 1 },
-        //     imageURL:
-        //       "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
-        //     imageURLArray: [],
-        //   });
-        // }
         return true;
       }
     } catch (error) {
@@ -188,7 +168,16 @@ function Profile() {
         {/* Banner image: */}
         <div>
           <div className="settingsOptionOuterDiv">
-            <div className="settingsOptionInnerDiv">Banner Image: </div>
+            <div className="settingsOptionInnerDiv">
+              <ProfileImage
+                tempTheme={tempTheme}
+                text="Banner Image"
+                id="bannerImage"
+                uploadKey="bannerURL"
+                uploadListKey="bannerArray"
+                setTempTheme={setTempTheme}
+              />
+            </div>
           </div>
           <div className="editDivider"></div>
         </div>
@@ -198,6 +187,8 @@ function Profile() {
             <div className="settingsOptionInnerDiv">
               <ProfileImage
                 tempTheme={tempTheme}
+                text="Profile Image"
+                id="profileImage"
                 uploadKey="imageURL"
                 uploadListKey="imageURLArray"
                 setTempTheme={setTempTheme}
@@ -210,6 +201,11 @@ function Profile() {
         <div>
           <div className="settingsOptionOuterDiv">
             <div className="settingsOptionInnerDiv">Border Color: </div>
+            <ColorPicker
+              tempTheme={tempTheme}
+              colorKey="borderColor"
+              setTempTheme={setTempTheme}
+            />
           </div>
           <div className="editDivider"></div>
         </div>
@@ -217,13 +213,21 @@ function Profile() {
         <div>
           <div className="settingsOptionOuterDiv">
             <div className="settingsOptionInnerDiv">Username Color: </div>
+            <ColorPicker
+              tempTheme={tempTheme}
+              colorKey="uc"
+              setTempTheme={setTempTheme}
+            />
           </div>
           <div className="editDivider"></div>
         </div>
         {/* User Bio: */}
         <div>
           <div className="settingsOptionOuterDiv">
-            <div className="settingsOptionInnerDiv">User Bio: </div>
+            <div className="settingsOptionInnerDiv">
+              <UserBiography />
+            </div>
+            {/* <UserBio /> */}
           </div>
           <div className="editDivider"></div>
         </div>
@@ -274,9 +278,10 @@ function Profile() {
           }}
         >
           <div>
-            <img
-              src="https://www.primemotorz.com/wp-content/uploads/2019/08/secondary-banner-placeholder.jpg"
+            <div
+              alt="image"
               id="banner"
+              style={{ backgroundImage: `url("${tempTheme.bannerURL}")` }}
             />
           </div>
           <div>
@@ -285,17 +290,35 @@ function Profile() {
                 <div
                   alt="image"
                   id="profileImage"
-                  style={{ backgroundImage: `url("${tempTheme.imageURL}")` }}
+                  style={{
+                    backgroundImage: `url("${tempTheme.imageURL}")`,
+                    borderColor: `rgba(${tempTheme?.borderColor.r}, ${tempTheme?.borderColor.g}, ${tempTheme?.borderColor.b}, ${tempTheme?.borderColor.a})`,
+                  }}
                 />
               </div>
-              <div id="editProfileBtn">follow</div>
+              <div
+                id="editProfileBtn"
+                style={{
+                  borderColor: `rgba(${tempTheme?.borderColor.r}, ${tempTheme?.borderColor.g}, ${tempTheme?.borderColor.b}, ${tempTheme?.borderColor.a})`,
+                }}
+              >
+                follow
+              </div>
             </div>
             <div className="profileElement">
-              <div id="usernameDiv">{username}</div>
+              <div
+                id="usernameDiv"
+                style={{
+                  color: `rgba(${tempTheme?.uc.r}, ${tempTheme?.uc.g}, ${tempTheme?.uc.b}, ${tempTheme?.uc.a})`,
+                }}
+              >
+                {username}
+              </div>
             </div>
             <div className="profileElement">
               <div id="userBioDiv">
-                Currently working on a social media website.
+                This is the start of a new journey filled with twists and turns
+                😊
               </div>
             </div>
             <div className="profileElement countElement">
@@ -410,22 +433,32 @@ function Profile() {
         }}
       >
         <div>
-          <img
-            src="https://www.primemotorz.com/wp-content/uploads/2019/08/secondary-banner-placeholder.jpg"
+          <div
+            alt="image"
             id="banner"
+            style={{ backgroundImage: `url("${theme.bannerURL}")` }}
           />
         </div>
         <div>
           <div id="profileImageDivOuter">
             <div id="profileImageDiv">
               <div
-                style={{ backgroundImage: `url("${theme.imageURL}")` }}
+                style={{
+                  backgroundImage: `url("${theme.imageURL}")`,
+                  borderColor: `rgba(${theme?.borderColor.r}, ${theme?.borderColor.g}, ${theme?.borderColor.b}, ${theme?.borderColor.a})`,
+                }}
                 alt=""
                 id="profileImage"
               />
             </div>
             {user && user === username ? (
-              <div id="editProfileBtn" onClick={editProfile}>
+              <div
+                id="editProfileBtn"
+                onClick={editProfile}
+                style={{
+                  borderColor: `rgba(${theme?.borderColor.r}, ${theme?.borderColor.g}, ${theme?.borderColor.b}, ${theme?.borderColor.a})`,
+                }}
+              >
                 edit profile
               </div>
             ) : (
@@ -433,11 +466,18 @@ function Profile() {
             )}
           </div>
           <div className="profileElement">
-            <div id="usernameDiv">{username}</div>
+            <div
+              id="usernameDiv"
+              style={{
+                color: `rgba(${theme?.uc.r}, ${theme?.uc.g}, ${theme?.uc.b}, ${theme?.uc.a})`,
+              }}
+            >
+              {username}
+            </div>
           </div>
           <div className="profileElement">
             <div id="userBioDiv">
-              Currently working on a social media website.
+              This is the start of a new journey filled with twists and turns 😊
             </div>
           </div>
           <div className="profileElement countElement">
